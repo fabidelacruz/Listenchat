@@ -1,9 +1,11 @@
 package edu.utn.listenchat.activity;
 
+import java.util.ArrayList;
+import java.util.List;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
-
+import android.widget.TextView;
 import edu.utn.listenchat.listener.TextToSpeechCallaback;
 import edu.utn.listenchat.R;
 import edu.utn.listenchat.listener.VoiceRecognitionListener;
@@ -27,8 +29,33 @@ public class MainActivity extends ListeningActivity {
     // Here is where the magic happens
     @Override
     public void processVoiceCommands(String... voiceCommands) {
+        List<String> comandos = new ArrayList<String>();
+        comandos.add("escuchar mensajes");
+        comandos.add("enviar mensaje");
+        comandos.add("cancelar");
+        comandos.add("comandos");
+        comandos.add("ayuda");
+        comandos.add("salir");
+        comandos.add("entrar");
+        comandos.add("siguiente");
+        comandos.add("atras");
+
+        TextView tv = (TextView) findViewById(R.id.tv);
+        boolean esComando = false;
         for (String command : voiceCommands) {
-            Toast.makeText(this, command, Toast.LENGTH_LONG).show();
+          //  Toast.makeText(this, command, Toast.LENGTH_LONG).show();
+         //   tv.append(command + "\n");
+            for(String com : comandos) {
+                if (com.equals(command)) {
+                    Toast.makeText(this, command, Toast.LENGTH_LONG).show();
+                    esComando = true;
+                }
+            }
+        }
+        if(esComando){
+            textToSpeechService.speak("Como usted diga", buildStartCallback(), this);
+        }else{
+            textToSpeechService.speak("Comando desconocido", buildStartCallback(), this);
         }
         restartListeningService();
     }

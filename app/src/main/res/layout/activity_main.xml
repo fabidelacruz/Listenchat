@@ -15,4 +15,11 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <TextView
+        android:id="@+id/tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:layout_editor_absoluteX="162dp"
+        tools:layout_editor_absoluteY="351dp" />
+
 </android.support.constraint.ConstraintLayout>
