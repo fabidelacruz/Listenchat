@@ -46,7 +46,7 @@ public class MainActivity extends ListeningActivity {
           //  Toast.makeText(this, command, Toast.LENGTH_LONG).show();
          //   tv.append(command + "\n");
             for(String com : comandos) {
-                if (com.equals(command)) {
+                if (com.toLowerCase().contains(command)) {
                     Toast.makeText(this, command, Toast.LENGTH_LONG).show();
                     esComando = true;
                 }
