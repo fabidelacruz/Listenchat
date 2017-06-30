@@ -29,6 +29,7 @@ public abstract class ListeningActivity extends AppCompatActivity implements IVo
             intent.putExtra(EXTRA_LANGUAGE, new Locale("es", "ES"));
             intent.putExtra(EXTRA_LANGUAGE_MODEL, LANGUAGE_MODEL_FREE_FORM);
             intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, this.getPackageName());
+            intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 15000);
             speechRecognizer.startListening(intent);
         } catch(Exception ex) {
             Log.e("SpeechRecognition", "Cannot start service", ex);
