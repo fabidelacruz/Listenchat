@@ -2,7 +2,12 @@ package edu.utn.listenchat.activity;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.widget.Toast;
 import android.widget.TextView;
@@ -11,7 +16,13 @@ import edu.utn.listenchat.R;
 import edu.utn.listenchat.listener.VoiceRecognitionListener;
 import edu.utn.listenchat.service.TextToSpeechService;
 
+import static android.Manifest.permission.RECORD_AUDIO;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.widget.Toast.LENGTH_LONG;
+
 public class MainActivity extends ListeningActivity {
+
+    private static final int PERMISSION_REQUEST = 9999;
 
     private TextToSpeechService textToSpeechService = new TextToSpeechService();
 
@@ -19,6 +30,10 @@ public class MainActivity extends ListeningActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        if (ContextCompat.checkSelfPermission(this, RECORD_AUDIO) != PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, PERMISSION_REQUEST);
+        }
 
         textToSpeechService.speak(getString(R.string.welcome_message), buildStartCallback(), this);
 
@@ -47,7 +62,7 @@ public class MainActivity extends ListeningActivity {
          //   tv.append(command + "\n");
             for(String com : comandos) {
                 if (command.toLowerCase().contains(com.toLowerCase())) {
-                    Toast.makeText(this, command, Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, command, LENGTH_LONG).show();
                     esComando = true;
                 }
             }
@@ -73,6 +88,20 @@ public class MainActivity extends ListeningActivity {
             }
 
         };
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION_REQUEST: {
+                if (grantResults.length == 0 || grantResults[0] != PERMISSION_GRANTED) {
+                    Toast.makeText(this, "Permisos denegados. Saliendo..", LENGTH_LONG).show();
+                    this.finish();
+                }
+                break;
+            }
+
+        }
     }
 
 }
