@@ -1,9 +1,12 @@
 package edu.utn.listenchat.activity;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -11,6 +14,13 @@ import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.widget.Toast;
 import android.widget.TextView;
+
+import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.Lists;
+
+import javax.annotation.Nullable;
+
 import edu.utn.listenchat.listener.TextToSpeechCallaback;
 import edu.utn.listenchat.R;
 import edu.utn.listenchat.listener.VoiceRecognitionListener;
@@ -19,6 +29,7 @@ import edu.utn.listenchat.service.TextToSpeechService;
 import static android.Manifest.permission.RECORD_AUDIO;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.widget.Toast.LENGTH_LONG;
+import static com.google.common.collect.Collections2.filter;
 
 public class MainActivity extends ListeningActivity {
 
@@ -26,8 +37,20 @@ public class MainActivity extends ListeningActivity {
 
     private TextToSpeechService textToSpeechService = new TextToSpeechService();
 
+    private List<String> comandos = new ArrayList<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        comandos.add("escuchar mensajes");
+        comandos.add("enviar mensaje");
+        comandos.add("cancelar");
+        comandos.add("comandos");
+        comandos.add("ayuda");
+        comandos.add("salir");
+        comandos.add("entrar");
+        comandos.add("siguiente");
+        comandos.add("atras");
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -41,38 +64,56 @@ public class MainActivity extends ListeningActivity {
         startListening(); // starts listening
     }
 
-    // Here is where the magic happens
     @Override
     public void processVoiceCommands(String... voiceCommands) {
-        List<String> comandos = new ArrayList<String>();
-        comandos.add("escuchar mensajes");
-        comandos.add("enviar mensaje");
-        comandos.add("cancelar");
-        comandos.add("comandos");
-        comandos.add("ayuda");
-        comandos.add("salir");
-        comandos.add("entrar");
-        comandos.add("siguiente");
-        comandos.add("atras");
+        List<String> filtered = filterCommands(voiceCommands);
 
-        TextView tv = (TextView) findViewById(R.id.tv);
-        boolean esComando = false;
-        for (String command : voiceCommands) {
-          //  Toast.makeText(this, command, Toast.LENGTH_LONG).show();
-         //   tv.append(command + "\n");
-            for(String com : comandos) {
-                if (command.toLowerCase().contains(com.toLowerCase())) {
-                    Toast.makeText(this, command, LENGTH_LONG).show();
-                    esComando = true;
-                }
+        if (filtered.isEmpty()) {
+            textToSpeechService.speak("Comando desconocido", buildStartCallback(), this);
+        } else {
+            switch (filtered.get(0).toLowerCase()) {
+                case "escuchar mensajes":
+                    handleListenMessages(this);
+                    break;
+                case "enviar mensaje":
+                    break;
+                case "cancelar":
+                    break;
+                case "comandos":
+                    break;
+                case "ayuda":
+                    break;
+                case "salir":
+                    break;
+                case "entrar":
+                    break;
+                case "siguiente":
+                    break;
+                case "atras":
+                    break;
             }
         }
-        if(esComando){
-            textToSpeechService.speak("Como usted diga", buildStartCallback(), this);
-        }else{
-            textToSpeechService.speak("Comando desconocido", buildStartCallback(), this);
-        }
+
         restartListeningService();
+    }
+
+    private void handleListenMessages(Context context) {
+    }
+
+    private List<String> filterCommands(String[] voiceCommands) {
+        return Lists.newArrayList(filter(Arrays.asList(voiceCommands), new Predicate<String>() {
+            @Override
+            public boolean apply(@Nullable String input) {
+                boolean valid = false;
+
+                for (String command : comandos) {
+                    if (input != null && input.toLowerCase().contains(command)) {
+                        valid = true;
+                    }
+                }
+                return valid;
+            }
+        }));
     }
 
     private TextToSpeechCallaback buildStartCallback() {
