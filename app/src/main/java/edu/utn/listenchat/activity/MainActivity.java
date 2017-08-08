@@ -15,6 +15,15 @@ import android.util.Log;
 import android.widget.Toast;
 import android.widget.TextView;
 
+import android.content.BroadcastReceiver;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.graphics.Color;
+import android.support.v4.content.LocalBroadcastManager;
+import android.text.Html;
+import android.widget.TableLayout;
+import android.widget.TableRow;
+
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
@@ -39,6 +48,8 @@ public class MainActivity extends ListeningActivity {
 
     private List<String> comandos = new ArrayList<>();
 
+    TableLayout tab;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         comandos.add("escuchar mensajes");
@@ -54,14 +65,20 @@ public class MainActivity extends ListeningActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //para la lectura de notificaciones!!!!!!!!!!!!
+        tab = (TableLayout)findViewById(R.id.tab);
+        LocalBroadcastManager.getInstance(this).registerReceiver(onNotice, new IntentFilter("Msg"));
+
+
         if (ContextCompat.checkSelfPermission(this, RECORD_AUDIO) != PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, PERMISSION_REQUEST);
         }
 
         textToSpeechService.speak(getString(R.string.welcome_message), buildStartCallback(), this);
 
+        /*
         VoiceRecognitionListener.getInstance().setListener(this); // Here we set the current listener
-        startListening(); // starts listening
+        startListening(); // starts listening*/
     }
 
     @Override
@@ -145,4 +162,28 @@ public class MainActivity extends ListeningActivity {
         }
     }
 
+
+    //escucha las notificaciones!!!!!!!!
+    private BroadcastReceiver onNotice= new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String pack = intent.getStringExtra("package");
+            String title = intent.getStringExtra("title");
+            String text = intent.getStringExtra("text");
+
+
+
+            TableRow tr = new TableRow(getApplicationContext());
+            tr.setLayoutParams(new TableRow.LayoutParams( TableRow.LayoutParams.MATCH_PARENT, TableRow.LayoutParams.WRAP_CONTENT));
+            TextView textview = new TextView(getApplicationContext());
+            textview.setLayoutParams(new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT,1.0f));
+            textview.setTextSize(20);
+            textview.setTextColor(Color.parseColor("#0B0719"));
+            textview.setText(Html.fromHtml(pack +"<br><b>" + title + " : </b>" + text));
+            tr.addView(textview);
+            tab.addView(tr);
+
+        }
+    };
 }
