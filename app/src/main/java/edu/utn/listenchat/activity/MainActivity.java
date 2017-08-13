@@ -8,10 +8,14 @@ import java.util.List;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.widget.ListView;
 import android.widget.Toast;
 import android.widget.TextView;
 
@@ -48,7 +52,9 @@ public class MainActivity extends ListeningActivity {
 
     private List<String> comandos = new ArrayList<>();
 
-    TableLayout tab;
+    ListView list;
+    CustomListAdapter adapter;
+    ArrayList<Model> modelList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,7 +72,16 @@ public class MainActivity extends ListeningActivity {
         setContentView(R.layout.activity_main);
 
         //para la lectura de notificaciones!!!!!!!!!!!!
-        tab = (TableLayout)findViewById(R.id.tab);
+        modelList = new ArrayList<Model>();
+        adapter = new CustomListAdapter(getApplicationContext(), modelList);
+        list=(ListView)findViewById(R.id.list);
+        list.setAdapter(adapter);
+
+        if (!checkNotificationEnabled()) {
+            Toast.makeText(this, "Por favor habilite a Listenchat para recibir notificaciones", LENGTH_LONG).show();;
+            Intent intent = new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS");
+            startActivity(intent);
+        }
         LocalBroadcastManager.getInstance(this).registerReceiver(onNotice, new IntentFilter("Msg"));
 
 
@@ -79,6 +94,21 @@ public class MainActivity extends ListeningActivity {
         /*
         VoiceRecognitionListener.getInstance().setListener(this); // Here we set the current listener
         startListening(); // starts listening*/
+    }
+
+    private boolean checkNotificationEnabled() {
+        try{
+            if(Settings.Secure.getString(this.getContentResolver(), "enabled_notification_listeners").contains(this.getPackageName()))
+            {
+                return true;
+            } else {
+                return false;
+            }
+
+        }catch(Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     @Override
@@ -168,22 +198,34 @@ public class MainActivity extends ListeningActivity {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            String pack = intent.getStringExtra("package");
             String title = intent.getStringExtra("title");
             String text = intent.getStringExtra("text");
+            //int id = intent.getIntExtra("icon",0);
 
+            try {
+                byte[] byteArray =intent.getByteArrayExtra("icon");
+                Bitmap bmp = null;
+                if(byteArray !=null) {
+                    bmp = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
+                }
+                Model model = new Model();
+                model.setName(title +" " +text);
+                model.setImage(bmp);
 
+                if(modelList !=null) {
+                    modelList.add(model);
+                    adapter.notifyDataSetChanged();
+                }else {
+                    modelList = new ArrayList<Model>();
+                    modelList.add(model);
+                    adapter = new CustomListAdapter(getApplicationContext(), modelList);
+                    list=(ListView)findViewById(R.id.list);
+                    list.setAdapter(adapter);
+                }
 
-            TableRow tr = new TableRow(getApplicationContext());
-            tr.setLayoutParams(new TableRow.LayoutParams( TableRow.LayoutParams.MATCH_PARENT, TableRow.LayoutParams.WRAP_CONTENT));
-            TextView textview = new TextView(getApplicationContext());
-            textview.setLayoutParams(new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT,1.0f));
-            textview.setTextSize(20);
-            textview.setTextColor(Color.parseColor("#0B0719"));
-            textview.setText(Html.fromHtml(pack +"<br><b>" + title + " : </b>" + text));
-            tr.addView(textview);
-            tab.addView(tr);
-
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     };
 }

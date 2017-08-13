@@ -14,18 +14,13 @@ public class NotificationService extends NotificationListenerService {
     Context context;
 
     @Override
-
     public void onCreate() {
-
         super.onCreate();
         context = getApplicationContext();
-
     }
+
     @Override
-
     public void onNotificationPosted(StatusBarNotification sbn) {
-
-
         String pack = sbn.getPackageName();
         String ticker = sbn.getNotification().tickerText.toString();
         Bundle extras = sbn.getNotification().extras;
@@ -52,6 +47,5 @@ public class NotificationService extends NotificationListenerService {
 
     public void onNotificationRemoved(StatusBarNotification sbn) {
         Log.i("Msg","Notification Removed");
-
     }
 }
