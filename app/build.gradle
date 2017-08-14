@@ -30,4 +30,6 @@ dependencies {
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.google.guava:guava:22.0-android'
     testCompile 'junit:junit:4.12'
+    compile 'com.github.badoualy:kotlogram:1.0.0-RC3'
+    compile 'commons-io:commons-io:2.5'
 }

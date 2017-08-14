@@ -1,9 +1,11 @@
 package edu.utn.listenchat.activity;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Scanner;
 
 import android.Manifest;
 import android.content.Context;
@@ -28,12 +30,20 @@ import android.text.Html;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 
+import com.github.badoualy.telegram.api.Kotlogram;
+import com.github.badoualy.telegram.api.TelegramApp;
+import com.github.badoualy.telegram.api.TelegramClient;
+import com.github.badoualy.telegram.tl.api.TLUser;
+import com.github.badoualy.telegram.tl.api.auth.TLAuthorization;
+import com.github.badoualy.telegram.tl.api.auth.TLSentCode;
+import com.github.badoualy.telegram.tl.exception.RpcErrorException;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 
 import javax.annotation.Nullable;
 
+import edu.utn.listenchat.TelegramApi.ApiStorage;
 import edu.utn.listenchat.listener.TextToSpeechCallaback;
 import edu.utn.listenchat.R;
 import edu.utn.listenchat.listener.VoiceRecognitionListener;
@@ -56,8 +66,55 @@ public class MainActivity extends ListeningActivity {
     CustomListAdapter adapter;
     ArrayList<Model> modelList;
 
+
+
+    //COSAS PARA TELEGRAM
+    // Get them from Telegram's console, ESTAS SON MI ID Y MI HASH, DEBERIAN PONER LAS SUYAS
+    public static final int API_ID = 192713;
+    public static final String API_HASH = "211f1a32bf0e9c798cdd2d6183b21fa9";
+
+    // What you want to appear in the "all sessions" screen, ACA PUEDEN PONER CUALQUIER COSA
+    public static final String APP_VERSION = "1";
+    public static final String MODEL = "915";
+    public static final String SYSTEM_VERSION = "4";
+    public static final String LANG_CODE = "en";
+
+    public static TelegramApp application = new TelegramApp(API_ID, API_HASH, MODEL, SYSTEM_VERSION, APP_VERSION, LANG_CODE);
+    // Phone number used for tests, SU TELEFONO
+    public static final String PHONE_NUMBER = "+541138925933"; // International format
+
+    //EN EL CREATE AGREGO RUTINA DE AUTENTICACION DE TELEGRAM
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        //AUTENTICACION TELEGRAM
+
+        // This is a synchronous client, that will block until the response arrive (or until timeout)
+        TelegramClient client = Kotlogram.getDefaultClient(application, new ApiStorage()); //CLIENTE QUE HACE TODA LA MAGIA, ACA EXPLOTA
+
+        // You can start making requests
+        try {
+            // Send code to account
+            TLSentCode sentCode = client.authSendCode(false, PHONE_NUMBER, true);
+            System.out.println("Authentication code: ");
+            String code = new Scanner(System.in).nextLine();
+
+            // Auth with the received code
+            TLAuthorization authorization = client.authSignIn(PHONE_NUMBER, sentCode.getPhoneCodeHash(), code);
+            TLUser self = authorization.getUser().getAsUser();
+            System.out.println("You are now signed in as " + self.getFirstName() + " " + self.getLastName() + " @" + self.getUsername());
+        } catch (RpcErrorException | IOException e) {
+            e.printStackTrace();
+        } finally {
+            client.close(); // Important, do not forget this, or your process won't finish
+        }
+        //EL CACHO DE CODIGO ANTERIOR DEBERIA DARNOS UNA AUTH KEY PARA PODER USAR TELEGRAM
+
+
+
         comandos.add("escuchar mensajes");
         comandos.add("enviar mensaje");
         comandos.add("cancelar");
