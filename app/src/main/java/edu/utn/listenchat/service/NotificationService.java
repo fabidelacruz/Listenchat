@@ -32,7 +32,7 @@ public class NotificationService extends NotificationListenerService {
         Log.i("Title",title);
         Log.i("Text",text);
 
-        Intent msgrcv = new Intent("Msg");
+        Intent msgrcv = new Intent("Listenchat-msg");
         msgrcv.putExtra("package", pack);
         msgrcv.putExtra("ticker", ticker);
         msgrcv.putExtra("title", title);
