@@ -5,8 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
@@ -21,11 +20,14 @@ import com.google.common.collect.Lists;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import javax.annotation.Nullable;
 
 import edu.utn.listenchat.R;
+import edu.utn.listenchat.service.PersistenceService;
+import edu.utn.listenchat.model.Message;
 import edu.utn.listenchat.listener.TextToSpeechCallaback;
 import edu.utn.listenchat.service.TextToSpeechService;
 
@@ -42,9 +44,10 @@ public class MainActivity extends ListeningActivity {
 
     private List<String> comandos = new ArrayList<>();
 
+    private PersistenceService persistenceService = new PersistenceService();
+
     ListView list;
     CustomListAdapter adapter;
-    ArrayList<Model> modelList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,9 +64,8 @@ public class MainActivity extends ListeningActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //para la lectura de notificaciones!!!!!!!!!!!!
-        modelList = new ArrayList<Model>();
-        adapter = new CustomListAdapter(getApplicationContext(), modelList);
+        Cursor cursor = persistenceService.getAllCursor(getApplicationContext());
+        adapter = new CustomListAdapter(getApplicationContext(), cursor, 0);
         list=(ListView)findViewById(R.id.list);
         list.setAdapter(adapter);
 
@@ -176,35 +178,20 @@ public class MainActivity extends ListeningActivity {
     }
 
 
-    //escucha las notificaciones!!!!!!!!
     private BroadcastReceiver onNotice= new BroadcastReceiver() {
 
         @Override
         public void onReceive(Context context, Intent intent) {
             String title = intent.getStringExtra("title");
             String text = intent.getStringExtra("text");
-            //int id = intent.getIntExtra("icon",0);
 
             try {
-                byte[] byteArray =intent.getByteArrayExtra("icon");
-                Bitmap bmp = null;
-                if(byteArray !=null) {
-                    bmp = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
-                }
-                Model model = new Model();
-                model.setName(title +" " +text);
-                model.setImage(bmp);
-
-                if(modelList !=null) {
-                    modelList.add(model);
-                    adapter.notifyDataSetChanged();
-                }else {
-                    modelList = new ArrayList<Model>();
-                    modelList.add(model);
-                    adapter = new CustomListAdapter(getApplicationContext(), modelList);
-                    list=(ListView)findViewById(R.id.list);
-                    list.setAdapter(adapter);
-                }
+                Message model = new Message();
+                model.setName(title);
+                model.setMessage(text);
+                model.setReceivedDate(new Date());
+                persistenceService.insert(context, model);
+                adapter.changeCursor(persistenceService.getAllCursor(context));
 
             } catch (Exception e) {
                 e.printStackTrace();

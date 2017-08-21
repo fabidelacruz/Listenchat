@@ -39,8 +39,6 @@ public class NotificationService extends NotificationListenerService {
         msgrcv.putExtra("text", text);
 
         LocalBroadcastManager.getInstance(context).sendBroadcast(msgrcv);
-
-
     }
 
     @Override

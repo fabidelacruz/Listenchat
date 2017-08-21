@@ -1,60 +1,38 @@
 package edu.utn.listenchat.activity;
 
-import android.app.Activity;
 import android.content.Context;
+import android.database.Cursor;
+import android.support.v4.widget.CursorAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-
 import edu.utn.listenchat.R;
+import edu.utn.listenchat.db.MessageContract;
 
-/**
- * Created by mukesh on 18/5/15.
- */
-public class CustomListAdapter extends BaseAdapter {
+public class CustomListAdapter extends CursorAdapter {
 
-    Context context;
-    private ArrayList<Model> modelList;
-
-    public CustomListAdapter(Context context, ArrayList<Model> modelList) {
-        this.context = context;
-        this.modelList = modelList;
+    public CustomListAdapter(Context context, Cursor c, int flags) {
+        super(context, c, flags);
     }
 
     @Override
-    public int getCount() {
-        return modelList.size();
+    public View newView(Context context, Cursor cursor, ViewGroup parent) {
+        return LayoutInflater.from(context).inflate(R.layout.list_item, parent, false);
     }
 
     @Override
-    public Object getItem(int position) {
-        return modelList.get(position);
+    public void bindView(View view, Context context, Cursor cursor) {
+        String name = cursor.getString(cursor.getColumnIndex(MessageContract.MessageEntry.COLUMN_NAME_CONTACT));
+        String message = cursor.getString(cursor.getColumnIndex(MessageContract.MessageEntry.COLUMN_NAME_CONTENT));
+
+        TextView txtTitle = (TextView) view.findViewById(R.id.Item_name);
+        txtTitle.setText(name);
+
+        TextView textMessage = (TextView) view.findViewById(R.id.Item_subject);
+        textMessage.setText(message);
     }
 
-    @Override
-    public long getItemId(int position) {
-        return position;
-    }
-
-    public View getView(int position, View view, ViewGroup parent) {
-        LayoutInflater inflater=(LayoutInflater) context
-                .getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
-        View rowView=inflater.inflate(R.layout.list_item, null,true);
-
-        TextView txtTitle = (TextView) rowView.findViewById(R.id.Itemname);
-        ImageView imageView = (ImageView) rowView.findViewById(R.id.icon);
-
-        Model m = modelList.get(position);
-        txtTitle.setText(m.getName());
-        if(m != null && m.getImage() !=null)
-        imageView.setImageBitmap(m.getImage());
-
-        return rowView;
-
-    };
+    ;
 }
