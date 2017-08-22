@@ -185,17 +185,23 @@ public class MainActivity extends ListeningActivity {
             String title = intent.getStringExtra("title");
             String text = intent.getStringExtra("text");
 
-            try {
-                Message model = new Message();
-                model.setName(title);
-                model.setMessage(text);
-                model.setReceivedDate(new Date());
-                persistenceService.insert(context, model);
-                adapter.changeCursor(persistenceService.getAllCursor(context));
+            if (isMessengerNotification(intent)) {
+                try {
+                    Message model = new Message();
+                    model.setName(title);
+                    model.setMessage(text);
+                    model.setReceivedDate(new Date());
+                    persistenceService.insert(context, model);
+                    adapter.changeCursor(persistenceService.getAllCursor(context));
 
-            } catch (Exception e) {
-                e.printStackTrace();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
     };
+
+    private static boolean isMessengerNotification(Intent intent) {
+        return "com.facebook.orca".equals(intent.getStringExtra("package"));
+    }
 }
