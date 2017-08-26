@@ -24,7 +24,7 @@ public class TextToSpeechService {
     private boolean started = false;
     private Map<String, TextToSpeechCallaback> queue = new HashMap<>();
 
-    public void speak(final String message, final TextToSpeechCallaback conversionCallback, Activity appContext) {
+    synchronized public void speak(final String message, final TextToSpeechCallaback conversionCallback, Activity appContext) {
         if (textToSpeech != null) {
             if (started) {
                 speak(message, conversionCallback);
