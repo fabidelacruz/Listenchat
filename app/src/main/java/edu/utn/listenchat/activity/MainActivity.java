@@ -26,6 +26,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import edu.utn.listenchat.R;
+import edu.utn.listenchat.listener.VoiceRecognitionListener;
 import edu.utn.listenchat.service.PersistenceService;
 import edu.utn.listenchat.model.Message;
 import edu.utn.listenchat.listener.TextToSpeechCallaback;
@@ -83,7 +84,6 @@ public class MainActivity extends ListeningActivity {
 
         textToSpeechService.speak(getString(R.string.welcome_message), buildStartCallback(), this);
 
-        /*
         VoiceRecognitionListener.getInstance().setListener(this); // Here we set the current listener
         startListening(); // starts listening*/
     }
@@ -100,9 +100,7 @@ public class MainActivity extends ListeningActivity {
     public void processVoiceCommands(String... voiceCommands) {
         List<String> filtered = filterCommands(voiceCommands);
 
-        if (filtered.isEmpty()) {
-            textToSpeechService.speak("Comando desconocido", buildStartCallback(), this);
-        } else {
+        if (!filtered.isEmpty()) {
             switch (filtered.get(0).toLowerCase()) {
                 case "escuchar mensajes":
                     handleListenMessages(this);
@@ -122,6 +120,9 @@ public class MainActivity extends ListeningActivity {
                 case "siguiente":
                     break;
                 case "atras":
+                    break;
+                default:
+                    textToSpeechService.speak("Comando desconocido", buildStartCallback(), this);
                     break;
             }
         }
