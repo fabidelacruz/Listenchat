@@ -24,16 +24,14 @@ public class CustomListAdapter extends CursorAdapter {
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-        String intentId = cursor.getString(cursor.getColumnIndex(MessageContract.MessageEntry.COLUMN_NAME_INTENT_ID));
         String name = cursor.getString(cursor.getColumnIndex(MessageContract.MessageEntry.COLUMN_NAME_CONTACT));
         String message = cursor.getString(cursor.getColumnIndex(MessageContract.MessageEntry.COLUMN_NAME_CONTENT));
 
         TextView txtTitle = (TextView) view.findViewById(R.id.Item_name);
-        txtTitle.setText(name + " - "+ intentId);
+        txtTitle.setText(name);
 
         TextView textMessage = (TextView) view.findViewById(R.id.Item_subject);
         textMessage.setText(message);
     }
 
-    ;
 }

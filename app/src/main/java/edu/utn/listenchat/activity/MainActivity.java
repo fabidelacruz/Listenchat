@@ -20,6 +20,8 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -43,6 +45,8 @@ import static com.google.common.collect.Collections2.filter;
 public class MainActivity extends ListeningActivity {
 
     private static final int PERMISSION_REQUEST = 9999;
+
+    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
 
     private TextToSpeechService textToSpeechService = new TextToSpeechService();
 
@@ -199,17 +203,26 @@ public class MainActivity extends ListeningActivity {
         public void onReceive(Context context, Intent intent) {
             String title = intent.getStringExtra("title");
             String text = intent.getStringExtra("text");
-            String intentId = intent.getStringExtra("id");
 
             if (isMessengerNotification(intent)) {
                 try {
-                    Message model = new Message();
-                    model.setIntentId(intentId);
-                    model.setName(title);
-                    model.setMessage(text);
-                    model.setReceivedDate(new Date());
-                    persistenceService.insert(context, model);
-                    adapter.changeCursor(persistenceService.getAllCursor(context));
+                    Date date = new Date();
+                    String intentId = DATE_FORMAT.format(date) + "-" + title + "-" + text;
+
+                    Log.i("CONTROL", "New Intent id: " + intentId);
+
+                    if (!isDuplicated(intentId)) {
+                        Message model = new Message();
+                        model.setIntentId(intentId);
+                        model.setName(title);
+                        model.setMessage(text);
+                        model.setReceivedDate(date);
+                        persistenceService.insert(context, model);
+                        adapter.changeCursor(persistenceService.getAllCursor(context));
+                        Log.i("CONTROL", "Saved Intent id: " + intentId);
+                    } else {
+                        Log.i("CONTROL", "Duplicated Intent id: " + intentId);
+                    }
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -226,12 +239,24 @@ public class MainActivity extends ListeningActivity {
         Multimap<String, String> map = ArrayListMultimap.create();
         if (cursor.moveToFirst()) {
             do {
-                String contact = cursor.getString(1);
-                String message = cursor.getString(2);
+                String contact = cursor.getString(2);
+                String message = cursor.getString(3);
                 map.put(contact, message);
             } while(cursor.moveToNext());
         }
         return map;
+    }
+
+    private boolean isDuplicated(String intentId) {
+        Cursor cursor = persistenceService.getAllCursor(getApplicationContext());
+        if (cursor.moveToFirst()) {
+            do {
+                if (intentId.equals(cursor.getString(1))) {
+                    return true;
+                }
+            } while (cursor.moveToNext());
+        }
+        return false;
     }
 
 }
