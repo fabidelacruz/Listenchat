@@ -4,9 +4,18 @@ import java.util.Date;
 
 public class Message {
 
+    private String intentId;
     private String name;
     private String message;
     private Date receivedDate;
+
+    public String getIntentId() {
+        return intentId;
+    }
+
+    public void setIntentId(String intentId) {
+        this.intentId = intentId;
+    }
 
     public String getName() {
         return name;

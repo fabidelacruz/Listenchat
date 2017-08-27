@@ -16,12 +16,15 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.google.common.base.Predicate;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 
@@ -83,6 +86,17 @@ public class MainActivity extends ListeningActivity {
         }
 
         textToSpeechService.speak(getString(R.string.welcome_message), buildStartCallback(), this);
+
+        Multimap<String, String> allMessages = this.convertCursorToMap(cursor);
+
+        StringBuilder stringBuilder = new StringBuilder();
+        for (String user : allMessages.keySet()) {
+            stringBuilder.append("Mensajes de "+ user);
+            for (String message : allMessages.get(user)) {
+                stringBuilder.append(message);
+            }
+            textToSpeechService.speak(stringBuilder.toString(), buildStartCallback(), this);
+        }
 
         VoiceRecognitionListener.getInstance().setListener(this); // Here we set the current listener
         startListening(); // starts listening*/
@@ -185,10 +199,12 @@ public class MainActivity extends ListeningActivity {
         public void onReceive(Context context, Intent intent) {
             String title = intent.getStringExtra("title");
             String text = intent.getStringExtra("text");
+            String intentId = intent.getStringExtra("id");
 
             if (isMessengerNotification(intent)) {
                 try {
                     Message model = new Message();
+                    model.setIntentId(intentId);
                     model.setName(title);
                     model.setMessage(text);
                     model.setReceivedDate(new Date());
@@ -205,4 +221,17 @@ public class MainActivity extends ListeningActivity {
     private static boolean isMessengerNotification(Intent intent) {
         return "com.facebook.orca".equals(intent.getStringExtra("package"));
     }
+
+    private Multimap<String, String> convertCursorToMap(Cursor cursor) {
+        Multimap<String, String> map = ArrayListMultimap.create();
+        if (cursor.moveToFirst()) {
+            do {
+                String contact = cursor.getString(1);
+                String message = cursor.getString(2);
+                map.put(contact, message);
+            } while(cursor.moveToNext());
+        }
+        return map;
+    }
+
 }

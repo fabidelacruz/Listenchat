@@ -22,6 +22,7 @@ public class PersistenceService {
         java.text.DateFormat formatter = DateFormat.getDateFormat(context);
 
         ContentValues values = new ContentValues();
+        values.put(MessageEntry.COLUMN_NAME_INTENT_ID, model.getIntentId());
         values.put(MessageEntry.COLUMN_NAME_CONTACT, model.getName());
         values.put(MessageEntry.COLUMN_NAME_CONTENT, model.getMessage());
         values.put(MessageEntry.COLUMN_NAME_DATE, formatter.format(model.getReceivedDate()));
