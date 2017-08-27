@@ -22,15 +22,11 @@ public class TextToSpeechService {
 
     private TextToSpeech textToSpeech;
     private boolean started = false;
-    private Map<String, TextToSpeechCallaback> queue = new HashMap<>();
+    private List<Object[]> queue = new ArrayList<>();
 
     synchronized public void speak(final String message, final TextToSpeechCallaback conversionCallback, Activity appContext) {
         if (textToSpeech != null) {
-            if (started) {
-                speak(message, conversionCallback);
-            } else {
-                queue.put(message, conversionCallback);
-            }
+            speak(message, conversionCallback);
         } else {
             textToSpeech = new TextToSpeech(appContext, new TextToSpeech.OnInitListener() {
                 @Override
@@ -40,13 +36,8 @@ public class TextToSpeechService {
                         textToSpeech.setPitch(1.3f);
                         textToSpeech.setSpeechRate(1f);
 
-                        TextToSpeechService.this.speak(message, conversionCallback);
-                        while (!queue.isEmpty()) {
-                            String key = (String) queue.keySet().toArray()[0];
-                            TextToSpeechCallaback callback = queue.remove(key);
-                            TextToSpeechService.this.speak(key, callback);
-                        }
                         started = true;
+                        TextToSpeechService.this.speak(message, conversionCallback);
                     } else {
                         conversionCallback.onErrorOccured(-1);
                     }
@@ -56,10 +47,20 @@ public class TextToSpeechService {
     }
 
     private void speak(String message, TextToSpeechCallaback conversionCallback) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            ttsGreater21(message, conversionCallback);
-        } else {
-            ttsUnder20(message, conversionCallback);
+        queue.add(new Object[] {message, conversionCallback});
+
+        if (started) {
+            while (!queue.isEmpty()) {
+                Object[] array = queue.remove(0);
+                String key = (String) array[0];
+                TextToSpeechCallaback callback = (TextToSpeechCallaback) array[1];
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    ttsGreater21(message, conversionCallback);
+                } else {
+                    ttsUnder20(message, conversionCallback);
+                }
+            }
         }
     }
 
