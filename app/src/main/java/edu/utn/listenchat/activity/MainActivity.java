@@ -24,6 +24,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -142,14 +143,19 @@ public class MainActivity extends ListeningActivity {
 
         Multimap<String, String> allMessages = this.convertCursorToMap(cursor);
 
-        for (String user : allMessages.keySet()) {
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append("Mensajes de "+ user + ". ");
-            for (String message : allMessages.get(user)) {
-                stringBuilder.append(message + ". ");
+        if (allMessages.keySet().size() > 0) {
+            for (String user : allMessages.keySet()) {
+                StringBuilder stringBuilder = new StringBuilder();
+                Collection<String> userMessages = allMessages.get(user);
+                stringBuilder.append(userMessages.size() + " mensajes recibidos de "+ user + ". ");
+                for (String message : userMessages) {
+                    stringBuilder.append(message + ". ");
+                }
+                Log.i("MENSAJES", stringBuilder.toString());
+                textToSpeechService.speak(stringBuilder.toString(), buildStartCallback(), this);
             }
-            Log.i("MENSAJES", stringBuilder.toString());
-            textToSpeechService.speak(stringBuilder.toString(), buildStartCallback(), this);
+        } else {
+            textToSpeechService.speak("Usted no ha recibido ningún mensaje nuevo", buildStartCallback(), this);
         }
     }
 
