@@ -2,19 +2,21 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical" >
+
     <TextView
         android:id="@+id/Item_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="20sp"
+        android:paddingTop="5dp"
         android:textColor="#000000"
-        android:paddingTop="5dp"/>
+        android:textSize="18sp"
+        android:textStyle="bold|italic" />
 
     <TextView
         android:id="@+id/Item_subject"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="20sp"
+        android:paddingTop="5dp"
         android:textColor="#000000"
-        android:paddingTop="5dp"/>
+        android:textSize="16sp" />
 </LinearLayout>
