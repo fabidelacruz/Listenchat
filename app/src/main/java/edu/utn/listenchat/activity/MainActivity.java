@@ -93,12 +93,13 @@ public class MainActivity extends ListeningActivity {
 
         Multimap<String, String> allMessages = this.convertCursorToMap(cursor);
 
-        StringBuilder stringBuilder = new StringBuilder();
         for (String user : allMessages.keySet()) {
-            stringBuilder.append("Mensajes de "+ user);
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append("Mensajes de "+ user + ". ");
             for (String message : allMessages.get(user)) {
-                stringBuilder.append(message);
+                stringBuilder.append(message + ". ");
             }
+            Log.i("MENSAJES", stringBuilder.toString());
             textToSpeechService.speak(stringBuilder.toString(), buildStartCallback(), this);
         }
 
