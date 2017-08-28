@@ -91,18 +91,6 @@ public class MainActivity extends ListeningActivity {
 
         textToSpeechService.speak(getString(R.string.welcome_message), buildStartCallback(), this);
 
-        Multimap<String, String> allMessages = this.convertCursorToMap(cursor);
-
-        for (String user : allMessages.keySet()) {
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append("Mensajes de "+ user + ". ");
-            for (String message : allMessages.get(user)) {
-                stringBuilder.append(message + ". ");
-            }
-            Log.i("MENSAJES", stringBuilder.toString());
-            textToSpeechService.speak(stringBuilder.toString(), buildStartCallback(), this);
-        }
-
         VoiceRecognitionListener.getInstance().setListener(this); // Here we set the current listener
         startListening(); // starts listening*/
     }
@@ -150,6 +138,19 @@ public class MainActivity extends ListeningActivity {
     }
 
     private void handleListenMessages(Context context) {
+        Cursor cursor = persistenceService.getAllCursor(getApplicationContext());
+
+        Multimap<String, String> allMessages = this.convertCursorToMap(cursor);
+
+        for (String user : allMessages.keySet()) {
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append("Mensajes de "+ user + ". ");
+            for (String message : allMessages.get(user)) {
+                stringBuilder.append(message + ". ");
+            }
+            Log.i("MENSAJES", stringBuilder.toString());
+            textToSpeechService.speak(stringBuilder.toString(), buildStartCallback(), this);
+        }
     }
 
     private List<String> filterCommands(String[] voiceCommands) {
