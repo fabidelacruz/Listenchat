@@ -74,7 +74,7 @@ public class MainActivity extends ListeningActivity {
         setContentView(R.layout.activity_main);
 
         Cursor cursor = persistenceService.getAllCursor(getApplicationContext());
-        adapter = new CustomListAdapter(getApplicationContext(), cursor, 0);
+        adapter = new CustomListAdapter(getApplicationContext(), cursor);
         list=(ListView)findViewById(R.id.list);
         list.setAdapter(adapter);
 

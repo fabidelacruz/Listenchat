@@ -13,8 +13,8 @@ import edu.utn.listenchat.db.MessageContract;
 
 public class CustomListAdapter extends CursorAdapter {
 
-    public CustomListAdapter(Context context, Cursor c, int flags) {
-        super(context, c, flags);
+    public CustomListAdapter(Context context, Cursor c) {
+        super(context, c, true);
     }
 
     @Override
