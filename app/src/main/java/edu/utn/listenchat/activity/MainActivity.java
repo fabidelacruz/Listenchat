@@ -74,9 +74,7 @@ public class MainActivity extends ListeningActivity {
         setContentView(R.layout.activity_main);
 
         list=(ListView)findViewById(R.id.list);
-        Cursor cursor = persistenceService.getAllCursor(getApplicationContext());
-        adapter = new CustomListAdapter(getApplicationContext(), cursor);
-        list.setAdapter(adapter);
+        reloadAdapter();
 
         if (!checkNotificationEnabled()) {
             Toast.makeText(this, "Por favor habilite a Listenchat para recibir notificaciones", LENGTH_LONG).show();;
@@ -94,6 +92,12 @@ public class MainActivity extends ListeningActivity {
 
         VoiceRecognitionListener.getInstance().setListener(this); // Here we set the current listener
         startListening(); // starts listening*/
+    }
+
+    private void reloadAdapter() {
+        Cursor cursor = persistenceService.getAllCursor(getApplicationContext());
+        adapter = new CustomListAdapter(getApplicationContext(), cursor);
+        list.setAdapter(adapter);
     }
 
     private boolean checkNotificationEnabled() {
@@ -226,8 +230,8 @@ public class MainActivity extends ListeningActivity {
                         model.setMessage(text);
                         model.setReceivedDate(date);
                         persistenceService.insert(context, model);
-                        if (adapter != null) {
-                            adapter.changeCursor(persistenceService.getAllCursor(context));
+                        if (list != null) {
+                            reloadAdapter();
                         }
                         Log.i("CONTROL", "Saved Intent id: " + intentId);
                     } else {
