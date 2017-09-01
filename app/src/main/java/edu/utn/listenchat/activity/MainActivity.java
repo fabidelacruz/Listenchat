@@ -73,9 +73,9 @@ public class MainActivity extends ListeningActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        list=(ListView)findViewById(R.id.list);
         Cursor cursor = persistenceService.getAllCursor(getApplicationContext());
         adapter = new CustomListAdapter(getApplicationContext(), cursor);
-        list=(ListView)findViewById(R.id.list);
         list.setAdapter(adapter);
 
         if (!checkNotificationEnabled()) {
@@ -226,7 +226,9 @@ public class MainActivity extends ListeningActivity {
                         model.setMessage(text);
                         model.setReceivedDate(date);
                         persistenceService.insert(context, model);
-                        adapter.changeCursor(persistenceService.getAllCursor(context));
+                        if (adapter != null) {
+                            adapter.changeCursor(persistenceService.getAllCursor(context));
+                        }
                         Log.i("CONTROL", "Saved Intent id: " + intentId);
                     } else {
                         Log.i("CONTROL", "Duplicated Intent id: " + intentId);
