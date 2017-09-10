@@ -17,8 +17,10 @@ import android.widget.Toast;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -27,24 +29,27 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 
 import edu.utn.listenchat.R;
+import edu.utn.listenchat.db.MessageDao;
 import edu.utn.listenchat.listener.TextToSpeechCallaback;
 import edu.utn.listenchat.listener.VoiceRecognitionListener;
 import edu.utn.listenchat.model.Message;
 import edu.utn.listenchat.service.PersistenceService;
 import edu.utn.listenchat.service.TextToSpeechService;
+import edu.utn.listenchat.utils.DateUtils;
 
 import static android.Manifest.permission.RECORD_AUDIO;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.widget.Toast.LENGTH_LONG;
 import static com.google.common.collect.Collections2.filter;
+import static edu.utn.listenchat.utils.DateUtils.toStringUntilDay;
+import static edu.utn.listenchat.utils.DateUtils.toStringUntilMinute;
 
 public class MainActivity extends ListeningActivity {
-
-    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
 
     private TextToSpeechService textToSpeechService = new TextToSpeechService();
 
@@ -52,6 +57,7 @@ public class MainActivity extends ListeningActivity {
             "enviar mensaje", "cancelar", "comandos", "ayuda", "salir", "entrar", "siguiente", "anterior");
 
     private PersistenceService persistenceService = new PersistenceService();
+    private MessageDao messageDao = new MessageDao();
 
     ListView list;
     CustomListAdapter adapter;
@@ -310,7 +316,7 @@ public class MainActivity extends ListeningActivity {
             if (isMessengerNotification(intent)) {
                 try {
                     Date date = new Date();
-                    String intentId = DATE_FORMAT.format(date) + "-" + title + "-" + text;
+                    String intentId = toStringUntilMinute(date) + "-" + title + "-" + text;
 
                     Log.i("CONTROL", "New Intent id: " + intentId);
 
@@ -351,6 +357,16 @@ public class MainActivity extends ListeningActivity {
             } while(cursor.moveToNext());
         }
         return map;
+    }
+
+    private Multimap<String, Message> massagesByDate(String contact) {
+        Multimap<String, Message> messagesByDate = MultimapBuilder.treeKeys().linkedListValues().build();
+
+        List<Message> messages = this.messageDao.allFromContact(this.getApplicationContext(), contact);
+        for (Message message : messages) {
+            messagesByDate.put(toStringUntilDay(message.getReceivedDate()), message);
+        }
+        return messagesByDate;
     }
 
     private boolean isDuplicated(String intentId) {
