@@ -12,6 +12,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -51,10 +52,22 @@ import static edu.utn.listenchat.utils.DateUtils.toStringUntilMinute;
 
 public class MainActivity extends ListeningActivity {
 
+    private static final String NOVEDADES = "novedades";
+    private static final String LEER_MENSAJES_NUEVOS = "leer mensajes nuevos";
+    private static final String CONVERSACIÓN = "conversacion";
+    private static final String ENVIAR_MENSAJE = "enviar mensaje";
+    private static final String CANCELAR = "cancelar";
+    private static final String COMANDOS = "comandos";
+    private static final String AYUDA = "ayuda";
+    private static final String SALIR = "salir";
+    private static final String ENTRAR = "entrar";
+    private static final String SIGUIENTE = "siguiente";
+    private static final String ANTERIOR = "anterior";
+
     private TextToSpeechService textToSpeechService = new TextToSpeechService();
 
-    private List<String> comandos = Lists.newArrayList("novedades", "leer mensajes nuevos", "conversación",
-            "enviar mensaje", "cancelar", "comandos", "ayuda", "salir", "entrar", "siguiente", "anterior");
+    private List<String> comandos = Lists.newArrayList(NOVEDADES, LEER_MENSAJES_NUEVOS, CONVERSACIÓN,
+            ENVIAR_MENSAJE, CANCELAR, COMANDOS, AYUDA, SALIR, ENTRAR, SIGUIENTE, ANTERIOR);
 
     private PersistenceService persistenceService = new PersistenceService();
     private MessageDao messageDao = new MessageDao();
@@ -111,36 +124,50 @@ public class MainActivity extends ListeningActivity {
     }
 
     @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_MEDIA_NEXT:
+                handleFollowing(this);
+                break;
+            case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
+                handlePrevious(this);
+                break;
+        }
+
+        return true;
+    }
+
+    @Override
     public void processVoiceCommands(String... voiceCommands) {
         List<String> filtered = filterCommands(voiceCommands);
 
         if (!filtered.isEmpty()) {
             switch (filtered.get(0).toLowerCase()) {
-                case "novedades":
+                case NOVEDADES:
                     handleNovelties(this);
                     break;
-                case "leer mensajes nuevos":
+                case LEER_MENSAJES_NUEVOS:
                     handleNewMessages(this);
                     break;
-                case "conversación":
+                case CONVERSACIÓN:
                     handleConversation(this);
                     break;
-                case "enviar mensaje":
+                case ENVIAR_MENSAJE:
                     break;
-                case "cancelar":
+                case CANCELAR:
                     break;
-                case "comandos":
+                case COMANDOS:
                     break;
-                case "ayuda":
+                case AYUDA:
                     break;
-                case "salir":
+                case SALIR:
                     break;
-                case "entrar":
+                case ENTRAR:
                     break;
-                case "siguiente":
+                case SIGUIENTE:
                     handleFollowing(this);
                     break;
-                case "anterior":
+                case ANTERIOR:
                     this.handlePrevious(this);
                     break;
                 default:
@@ -302,9 +329,6 @@ public class MainActivity extends ListeningActivity {
 
         };
     }
-
-
-
 
     private BroadcastReceiver onNotice= new BroadcastReceiver() {
 
