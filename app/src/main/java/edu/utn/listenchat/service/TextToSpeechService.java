@@ -11,11 +11,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import edu.utn.listenchat.listener.TextToSpeechCallaback;
 
-import static android.R.attr.key;
 import static android.content.ContentValues.TAG;
 
 public class TextToSpeechService {
