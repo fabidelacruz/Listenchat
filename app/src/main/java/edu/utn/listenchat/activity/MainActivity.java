@@ -27,7 +27,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Nullable;
 
@@ -45,13 +44,12 @@ import static com.google.common.collect.Collections2.filter;
 
 public class MainActivity extends ListeningActivity {
 
-    private static final int PERMISSION_REQUEST = 9999;
-
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
 
     private TextToSpeechService textToSpeechService = new TextToSpeechService();
 
-    private List<String> comandos = new ArrayList<>();
+    private List<String> comandos = Lists.newArrayList("novedades", "leer mensajes nuevos", "conversación",
+            "enviar mensaje", "cancelar", "comandos", "ayuda", "salir", "entrar", "siguiente", "anterior");
 
     private PersistenceService persistenceService = new PersistenceService();
 
@@ -63,40 +61,33 @@ public class MainActivity extends ListeningActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        comandos.add("novedades");
-        comandos.add("leer mensajes nuevos");
-        comandos.add("conversación");
-        comandos.add("enviar mensaje");
-        comandos.add("cancelar");
-        comandos.add("comandos");
-        comandos.add("ayuda");
-        comandos.add("salir");
-        comandos.add("entrar");
-        comandos.add("siguiente");
-        comandos.add("anterior");
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         list=(ListView)findViewById(R.id.list);
+
         reloadAdapter();
+        checkPermissions();
 
-        if (!checkNotificationEnabled()) {
-            Toast.makeText(this, "Por favor habilite a Listenchat para recibir notificaciones", LENGTH_LONG).show();;
-            Intent intent = new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS");
-            startActivity(intent);
-        }
         LocalBroadcastManager.getInstance(this).registerReceiver(onNotice, new IntentFilter("Listenchat-msg"));
-
-
-        if (ContextCompat.checkSelfPermission(this, RECORD_AUDIO) != PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, PERMISSION_REQUEST);
-        }
 
         textToSpeechService.speak(getString(R.string.welcome_message), buildStartCallback(), this);
 
         VoiceRecognitionListener.getInstance().setListener(this); // Here we set the current listener
         startListening(); // starts listening*/
+    }
+
+    private void checkPermissions() {
+        if (!checkNotificationEnabled()) {
+            Toast.makeText(this, "Por favor habilite a Listenchat para recibir notificaciones", LENGTH_LONG).show();
+            ;
+            Intent intent = new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS");
+            startActivity(intent);
+        }
+
+        if (ContextCompat.checkSelfPermission(this, RECORD_AUDIO) != PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, PERMISSION_REQUEST);
+        }
     }
 
     private void reloadAdapter() {
@@ -256,7 +247,6 @@ public class MainActivity extends ListeningActivity {
 
         Multimap<String, String> allMessages = this.convertCursorToMap(cursor);
 
-
         if (allMessages.keySet().size() > 0) {
             StringBuilder stringBuilder = new StringBuilder();
             List<String> userMessages = Lists.newArrayList(allMessages.get(user));
@@ -307,19 +297,7 @@ public class MainActivity extends ListeningActivity {
         };
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case PERMISSION_REQUEST: {
-                if (grantResults.length == 0 || grantResults[0] != PERMISSION_GRANTED) {
-                    Toast.makeText(this, "Permisos denegados. Saliendo..", LENGTH_LONG).show();
-                    this.finish();
-                }
-                break;
-            }
 
-        }
-    }
 
 
     private BroadcastReceiver onNotice= new BroadcastReceiver() {

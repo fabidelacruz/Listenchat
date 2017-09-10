@@ -2,8 +2,6 @@ package edu.utn.listenchat.db;
 
 import android.provider.BaseColumns;
 
-import java.util.Date;
-
 public final class MessageContract {
 
     private MessageContract() {}

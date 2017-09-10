@@ -12,12 +12,15 @@ import java.util.Locale;
 import edu.utn.listenchat.listener.VoiceRecognitionListener;
 import edu.utn.listenchat.service.IVoiceControl;
 
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.speech.RecognizerIntent.EXTRA_LANGUAGE;
 import static android.speech.RecognizerIntent.EXTRA_LANGUAGE_MODEL;
 import static android.speech.RecognizerIntent.LANGUAGE_MODEL_FREE_FORM;
 import static android.widget.Toast.LENGTH_LONG;
 
 public abstract class ListeningActivity extends AppCompatActivity implements IVoiceControl {
+
+    protected static final int PERMISSION_REQUEST = 9999;
 
     protected SpeechRecognizer speechRecognizer;
 
@@ -100,5 +103,19 @@ public abstract class ListeningActivity extends AppCompatActivity implements IVo
     public void restartListeningService() {
         stopListening();
         startListening();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION_REQUEST: {
+                if (grantResults.length == 0 || grantResults[0] != PERMISSION_GRANTED) {
+                    Toast.makeText(this, "Permisos denegados. Saliendo..", LENGTH_LONG).show();
+                    this.finish();
+                }
+                break;
+            }
+
+        }
     }
 }
