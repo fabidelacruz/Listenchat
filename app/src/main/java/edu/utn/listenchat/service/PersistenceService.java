@@ -25,6 +25,7 @@ public class PersistenceService {
         values.put(MessageEntry.COLUMN_NAME_INTENT_ID, model.getIntentId());
         values.put(MessageEntry.COLUMN_NAME_CONTACT, model.getName());
         values.put(MessageEntry.COLUMN_NAME_CONTENT, model.getMessage());
+        values.put(MessageEntry.COLUMN_NAME_LEIDO, model.getLeido());
         values.put(MessageEntry.COLUMN_NAME_DATE, formatter.format(model.getReceivedDate()));
 
         SQLiteDatabase writableDatabase = new ListenchatDbHelper(context).getWritableDatabase();

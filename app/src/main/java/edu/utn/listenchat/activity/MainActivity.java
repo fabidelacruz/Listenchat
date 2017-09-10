@@ -27,15 +27,14 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Nullable;
 
 import edu.utn.listenchat.R;
-import edu.utn.listenchat.listener.VoiceRecognitionListener;
-import edu.utn.listenchat.service.PersistenceService;
-import edu.utn.listenchat.model.Message;
 import edu.utn.listenchat.listener.TextToSpeechCallaback;
+import edu.utn.listenchat.listener.VoiceRecognitionListener;
+import edu.utn.listenchat.model.Message;
+import edu.utn.listenchat.service.PersistenceService;
 import edu.utn.listenchat.service.TextToSpeechService;
 
 import static android.Manifest.permission.RECORD_AUDIO;
@@ -342,6 +341,7 @@ public class MainActivity extends ListeningActivity {
                         model.setName(title);
                         model.setMessage(text);
                         model.setReceivedDate(date);
+                        model.setLeido("N");
                         persistenceService.insert(context, model);
                         if (list != null) {
                             reloadAdapter();

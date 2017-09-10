@@ -2,8 +2,6 @@ package edu.utn.listenchat.db;
 
 import android.provider.BaseColumns;
 
-import java.util.Date;
-
 public final class MessageContract {
 
     private MessageContract() {}
@@ -14,6 +12,7 @@ public final class MessageContract {
         public static final String COLUMN_NAME_CONTACT = "contact";
         public static final String COLUMN_NAME_CONTENT = "content";
         public static final String COLUMN_NAME_DATE = "date";
+        public static final String COLUMN_NAME_LEIDO = "leido";
         public static final String COLUMN_NAME_INTENT_ID = "intent_id";
     }
 

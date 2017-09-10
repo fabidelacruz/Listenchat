@@ -5,10 +5,11 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import static android.provider.BaseColumns._ID;
-import static edu.utn.listenchat.db.MessageContract.MessageEntry.COLUMN_NAME_CONTENT;
 import static edu.utn.listenchat.db.MessageContract.MessageEntry.COLUMN_NAME_CONTACT;
+import static edu.utn.listenchat.db.MessageContract.MessageEntry.COLUMN_NAME_CONTENT;
 import static edu.utn.listenchat.db.MessageContract.MessageEntry.COLUMN_NAME_DATE;
 import static edu.utn.listenchat.db.MessageContract.MessageEntry.COLUMN_NAME_INTENT_ID;
+import static edu.utn.listenchat.db.MessageContract.MessageEntry.COLUMN_NAME_LEIDO;
 import static edu.utn.listenchat.db.MessageContract.MessageEntry.TABLE_NAME;
 
 public class ListenchatDbHelper extends SQLiteOpenHelper {
@@ -21,6 +22,7 @@ public class ListenchatDbHelper extends SQLiteOpenHelper {
             COLUMN_NAME_INTENT_ID + TEXT_TYPE + COMMA_SEP +
             COLUMN_NAME_CONTACT + TEXT_TYPE + COMMA_SEP +
             COLUMN_NAME_CONTENT + TEXT_TYPE + COMMA_SEP +
+            COLUMN_NAME_LEIDO + TEXT_TYPE + COMMA_SEP +
             COLUMN_NAME_DATE + TEXT_TYPE + " )";
 
     private static final int DATABASE_VERSION = 1;
