@@ -58,9 +58,14 @@ public class MainActivity extends ListeningActivity {
     ListView list;
     CustomListAdapter adapter;
 
+    private int currentMessage;
+    private boolean enabledConversation;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        comandos.add("escuchar mensajes");
+        comandos.add("novedades");
+        comandos.add("leer mensajes nuevos");
+        comandos.add("conversación");
         comandos.add("enviar mensaje");
         comandos.add("cancelar");
         comandos.add("comandos");
@@ -68,7 +73,7 @@ public class MainActivity extends ListeningActivity {
         comandos.add("salir");
         comandos.add("entrar");
         comandos.add("siguiente");
-        comandos.add("atras");
+        comandos.add("anterior");
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -114,8 +119,14 @@ public class MainActivity extends ListeningActivity {
 
         if (!filtered.isEmpty()) {
             switch (filtered.get(0).toLowerCase()) {
-                case "escuchar mensajes":
-                    handleListenMessages(this);
+                case "novedades":
+                    handleNovelties(this);
+                    break;
+                case "leer mensajes nuevos":
+                    handleNewMessages(this);
+                    break;
+                case "conversación":
+                    handleConversation(this);
                     break;
                 case "enviar mensaje":
                     break;
@@ -130,8 +141,10 @@ public class MainActivity extends ListeningActivity {
                 case "entrar":
                     break;
                 case "siguiente":
+                    handleFollowing(this);
                     break;
-                case "atras":
+                case "anterior":
+                    this.handlePrevious(this);
                     break;
                 default:
                     textToSpeechService.speak("Comando desconocido", buildStartCallback(), this);
@@ -142,7 +155,7 @@ public class MainActivity extends ListeningActivity {
         restartListeningService();
     }
 
-    private void handleListenMessages(Context context) {
+    private void handleNewMessages(Context context) {
         Cursor cursor = persistenceService.getAllCursor(getApplicationContext());
 
         Multimap<String, String> allMessages = this.convertCursorToMap(cursor);
@@ -151,7 +164,7 @@ public class MainActivity extends ListeningActivity {
             for (String user : allMessages.keySet()) {
                 StringBuilder stringBuilder = new StringBuilder();
                 Collection<String> userMessages = allMessages.get(user);
-                stringBuilder.append(userMessages.size() + " mensajes recibidos de "+ user + ". ");
+                stringBuilder.append("Mensajes recibidos de "+ user + ". ");
                 for (String message : userMessages) {
                     stringBuilder.append(message + ". ");
                 }
@@ -162,6 +175,106 @@ public class MainActivity extends ListeningActivity {
             textToSpeechService.speak("Usted no ha recibido ningún mensaje nuevo", buildStartCallback(), this);
         }
     }
+
+    private void handleNovelties(Context context) {
+        Cursor cursor = persistenceService.getAllCursor(getApplicationContext());
+
+        Multimap<String, String> allMessages = this.convertCursorToMap(cursor);
+
+        if (allMessages.keySet().size() > 0) {
+            for (String user : allMessages.keySet()) {
+                StringBuilder stringBuilder = new StringBuilder();
+                Collection<String> userMessages = allMessages.get(user);
+                stringBuilder.append(userMessages.size() + " mensajes recibidos de "+ user + ". ");
+                Log.i("MENSAJES", stringBuilder.toString());
+                textToSpeechService.speak(stringBuilder.toString(), buildStartCallback(), this);
+            }
+        } else {
+            textToSpeechService.speak("Usted no ha recibido ningún mensaje nuevo", buildStartCallback(), this);
+        }
+    }
+
+    private void handleFollowing(Context context) {
+        String user = "Fabián Cardaci";
+
+        Cursor cursor = persistenceService.getAllCursor(getApplicationContext());
+
+        Multimap<String, String> allMessages = this.convertCursorToMap(cursor);
+
+        if (this.enabledConversation) {
+            if (allMessages.keySet().size() > 0) {
+                StringBuilder stringBuilder = new StringBuilder();
+                List<String> userMessages = Lists.newArrayList(allMessages.get(user));
+                if (currentMessage + 1 < userMessages.size()) {
+                    currentMessage += 1;
+                    stringBuilder.append(userMessages.get(currentMessage) + ". ");
+                } else {
+                    stringBuilder.append("No hay más mensajes siguientes");
+                }
+                Log.i("MENSAJES", stringBuilder.toString());
+                textToSpeechService.speak(stringBuilder.toString(), buildStartCallback(), this);
+            } else {
+                textToSpeechService.speak("Situación no esperada", buildStartCallback(), this);
+            }
+        } else {
+            textToSpeechService.speak("El comando siguiente sólo puede usarse en modo conversación", buildStartCallback(), this);
+        }
+    }
+
+    private void handlePrevious(Context context) {
+        String user = "Fabián Cardaci";
+
+        Cursor cursor = persistenceService.getAllCursor(getApplicationContext());
+
+        Multimap<String, String> allMessages = this.convertCursorToMap(cursor);
+
+        if (this.enabledConversation) {
+            if (allMessages.keySet().size() > 0) {
+                StringBuilder stringBuilder = new StringBuilder();
+                List<String> userMessages = Lists.newArrayList(allMessages.get(user));
+                if (currentMessage - 1 >= 0) {
+                    currentMessage -= 1;
+                    stringBuilder.append(userMessages.get(currentMessage) + ". ");
+                } else {
+                    stringBuilder.append("No hay más mensajes anteriores");
+                }
+                Log.i("MENSAJES", stringBuilder.toString());
+                textToSpeechService.speak(stringBuilder.toString(), buildStartCallback(), this);
+            } else {
+                textToSpeechService.speak("Situación no esperada", buildStartCallback(), this);
+            }
+        } else {
+            textToSpeechService.speak("El comando anterior sólo puede usarse en modo conversación", buildStartCallback(), this);
+        }
+    }
+
+
+    private void handleConversation(Context context) {
+        String user = "Fabián Cardaci";
+
+        Cursor cursor = persistenceService.getAllCursor(getApplicationContext());
+
+        Multimap<String, String> allMessages = this.convertCursorToMap(cursor);
+
+
+        if (allMessages.keySet().size() > 0) {
+            StringBuilder stringBuilder = new StringBuilder();
+            List<String> userMessages = Lists.newArrayList(allMessages.get(user));
+            if (userMessages.size() > 0) {
+                textToSpeechService.speak("Conversación con " + user, buildStartCallback(), this);
+                currentMessage = -1;
+                this.enabledConversation = true;
+            } else {
+                textToSpeechService.speak("Usted no ha recibido mensajes de " + user, buildStartCallback(), this);
+                enabledConversation = false;
+            }
+        } else {
+            textToSpeechService.speak("Usted no ha recibido ningún mensaje", buildStartCallback(), this);
+            enabledConversation = false;
+        }
+
+    }
+
 
     private List<String> filterCommands(String[] voiceCommands) {
         return Lists.newArrayList(filter(Arrays.asList(voiceCommands), new Predicate<String>() {
