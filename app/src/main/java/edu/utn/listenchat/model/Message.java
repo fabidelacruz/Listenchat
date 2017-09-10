@@ -7,6 +7,7 @@ public class Message {
     private String intentId;
     private String name;
     private String message;
+    private String leido;
     private Date receivedDate;
 
     public String getIntentId() {
@@ -31,6 +32,14 @@ public class Message {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public String getLeido() {
+        return leido;
+    }
+
+    public void setLeido(String leido) {
+        this.leido = leido;
     }
 
     public Date getReceivedDate() {
