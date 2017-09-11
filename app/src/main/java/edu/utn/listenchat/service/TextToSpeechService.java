@@ -31,7 +31,7 @@ public class TextToSpeechService {
                 public void onInit(int status) {
                     if (status != TextToSpeech.ERROR) {
                         textToSpeech.setLanguage(new Locale("es", "ES"));
-                        textToSpeech.setPitch(1.3f);
+                        textToSpeech.setPitch(1.1f);
                         textToSpeech.setSpeechRate(1f);
 
                         started = true;

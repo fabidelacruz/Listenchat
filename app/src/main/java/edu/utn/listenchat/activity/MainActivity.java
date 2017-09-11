@@ -40,6 +40,8 @@ import static android.Manifest.permission.RECORD_AUDIO;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.view.KeyEvent.KEYCODE_MEDIA_NEXT;
 import static android.view.KeyEvent.KEYCODE_MEDIA_PREVIOUS;
+import static android.view.KeyEvent.KEYCODE_VOLUME_DOWN;
+import static android.view.KeyEvent.KEYCODE_VOLUME_UP;
 import static android.widget.Toast.LENGTH_LONG;
 import static com.google.common.collect.Collections2.filter;
 import static com.google.common.collect.Lists.newArrayList;
@@ -89,9 +91,6 @@ public class MainActivity extends ListeningActivity {
         LocalBroadcastManager.getInstance(this).registerReceiver(onNotice, new IntentFilter("Listenchat-msg"));
 
         textToSpeechService.speak(getString(R.string.welcome_message), buildStartCallback(), this);
-
-        VoiceRecognitionListener.getInstance().setListener(this); // Here we set the current listener
-        startListening(); // starts listening*/
     }
 
     private void checkPermissions() {
@@ -125,9 +124,11 @@ public class MainActivity extends ListeningActivity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         switch (keyCode) {
             case KEYCODE_MEDIA_NEXT:
+            case KEYCODE_VOLUME_UP:
                 handleFollowing(this);
                 break;
             case KEYCODE_MEDIA_PREVIOUS:
+            case KEYCODE_VOLUME_DOWN:
                 handlePrevious(this);
                 break;
         }
@@ -186,9 +187,9 @@ public class MainActivity extends ListeningActivity {
             for (String user : allMessages.keySet()) {
                 StringBuilder stringBuilder = new StringBuilder();
                 Collection<String> userMessages = allMessages.get(user);
-                stringBuilder.append("Mensajes recibidos de "+ user + ". ");
+                stringBuilder.append("Mensajes recibidos de ").append(user).append(". ");
                 for (String message : userMessages) {
-                    stringBuilder.append(message + ". ");
+                    stringBuilder.append(message).append(". ");
                 }
                 Log.i("MENSAJES", stringBuilder.toString());
                 textToSpeechService.speak(stringBuilder.toString(), buildReadCallback(messageIds(cursor), this), this);

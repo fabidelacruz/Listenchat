@@ -24,8 +24,13 @@ public abstract class ListeningActivity extends AppCompatActivity implements IVo
 
     protected SpeechRecognizer speechRecognizer;
 
+    protected void resumeListener() {
+        VoiceRecognitionListener.getInstance().setListener(this); // Here we set the current listener
+        startListening(); // starts listening*/
+    }
+
     // starts the service
-    protected void startListening() {
+    private void startListening() {
         try {
             initSpeech();
             Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
@@ -42,8 +47,8 @@ public abstract class ListeningActivity extends AppCompatActivity implements IVo
     // stops the service
     protected void stopListening() {
         if (speechRecognizer != null) {
-            speechRecognizer.stopListening();
-            speechRecognizer.cancel();
+            //speechRecognizer.stopListening();
+            //speechRecognizer.cancel();
             speechRecognizer.destroy();
         }
         speechRecognizer = null;
@@ -71,7 +76,13 @@ public abstract class ListeningActivity extends AppCompatActivity implements IVo
         stopListening();
         super.onStop();
     }
- 
+
+    @Override
+    protected void onResume() {
+        resumeListener();
+        super.onResume();
+    }
+
     @Override
     protected void onDestroy() {
         if (speechRecognizer != null) {
