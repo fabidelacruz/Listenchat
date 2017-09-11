@@ -48,4 +48,8 @@ public class PersistenceService {
         cv.put(COLUMN_NAME_LEIDO, "Y");
         new ListenchatDbHelper(context).getWritableDatabase().update(TABLE_NAME, cv, "_id in (" + join(integers, ",") + ")", null);
     }
+
+    public Cursor getNewsCursor(Context context) {
+        return new ListenchatDbHelper(context).getWritableDatabase().rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE " + COLUMN_NAME_LEIDO + " = 'N'", null);
+    }
 }

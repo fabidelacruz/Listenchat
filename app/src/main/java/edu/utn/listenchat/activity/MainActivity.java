@@ -137,7 +137,7 @@ public class MainActivity extends ListeningActivity {
             case KEYCODE_MEDIA_PLAY_PAUSE:
             case KEYCODE_MEDIA_PLAY:
             case KEYCODE_HEADSETHOOK:
-                handleNewMessages(this);
+                //Do navigation
                 break;
         }
 
@@ -187,7 +187,7 @@ public class MainActivity extends ListeningActivity {
     }
 
     private void handleNewMessages(Context context) {
-        Cursor cursor = persistenceService.getAllCursor(getApplicationContext());
+        Cursor cursor = persistenceService.getNewsCursor(getApplicationContext());
 
         Multimap<String, String> allMessages = convertCursorToMap(cursor);
 
@@ -211,7 +211,7 @@ public class MainActivity extends ListeningActivity {
         return new TextToSpeechCallaback() {
             @Override
             public void onCompletion() {
-                persistenceService.markNotified(integers, context);
+                //persistenceService.markNotified(integers, context);
             }
 
             @Override
@@ -222,7 +222,7 @@ public class MainActivity extends ListeningActivity {
     }
 
     private void handleNovelties(Context context) {
-        Cursor cursor = persistenceService.getAllCursor(getApplicationContext());
+        Cursor cursor = persistenceService.getNewsCursor(getApplicationContext());
 
         Multimap<String, String> allMessages = convertCursorToMap(cursor);
 
