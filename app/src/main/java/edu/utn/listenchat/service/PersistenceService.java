@@ -15,7 +15,9 @@ import edu.utn.listenchat.db.MessageContract.MessageEntry;
 import edu.utn.listenchat.model.Message;
 import edu.utn.listenchat.utils.DateUtils;
 
+import static edu.utn.listenchat.db.MessageContract.MessageEntry.COLUMN_NAME_LEIDO;
 import static edu.utn.listenchat.db.MessageContract.MessageEntry.TABLE_NAME;
+import static org.apache.commons.lang3.StringUtils.join;
 
 /**
  * Created by fabian on 20/08/17.
@@ -47,6 +49,12 @@ public class PersistenceService {
     }
 
     public void markNotified(List<Integer> integers, Context context) {
-        new ListenchatDbHelper(context).getWritableDatabase().rawQuery("UPDATE " + TABLE_NAME + "SET leido = 'Y' WHERE _id IN (" + StringUtils.join(integers, ",") + ")", null);
+        ContentValues cv = new ContentValues();
+        cv.put(COLUMN_NAME_LEIDO, "Y");
+        new ListenchatDbHelper(context).getWritableDatabase().update(TABLE_NAME, cv, "_id in (" + join(integers, ",") + ")", null);
+    }
+
+    public Cursor getNewsCursor(Context context) {
+        return new ListenchatDbHelper(context).getWritableDatabase().rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE " + COLUMN_NAME_LEIDO + " = 'N'", null);
     }
 }
