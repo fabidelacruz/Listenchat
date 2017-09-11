@@ -58,6 +58,7 @@ import static edu.utn.listenchat.utils.DateUtils.toDate;
 import static edu.utn.listenchat.utils.DateUtils.toPrettyString;
 import static edu.utn.listenchat.utils.DateUtils.toStringUntilDay;
 import static edu.utn.listenchat.utils.DateUtils.toStringUntilMinute;
+import static org.apache.commons.lang3.StringUtils.replace;
 
 public class MainActivity extends ListeningActivity {
 
@@ -90,7 +91,7 @@ public class MainActivity extends ListeningActivity {
     private int currentMessage;
     private boolean enabledConversation;
     private String currentDate;
-    private String contactMock = "Cacho Garay";
+    private String currentContact = "Cacho Garay";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -172,9 +173,6 @@ public class MainActivity extends ListeningActivity {
                 case LEER_MENSAJES_NUEVOS:
                     handleNewMessages(this);
                     break;
-                case CONVERSACIÓN:
-                    handleConversation(this);
-                    break;
                 case ENVIAR_MENSAJE:
                     break;
                 case CANCELAR:
@@ -200,12 +198,21 @@ public class MainActivity extends ListeningActivity {
                     this.handlePreviousDay(this);
                     break;
                 default:
-                    textToSpeechService.speak("Comando desconocido", buildStartCallback(), this);
+                    this.handleDefault(filtered.get(0).toLowerCase());
                     break;
             }
         }
 
         restartListeningService();
+    }
+
+    private void handleDefault(String command) {
+        if (command.contains("conversación con")) {
+            String contact = replace(command, "conversación con ", "");
+            this.handleConversation(contact);
+        } else {
+            textToSpeechService.speak("Comando desconocido", buildStartCallback(), this);
+        }
     }
 
     private void handleNewMessages(Context context) {
@@ -262,9 +269,7 @@ public class MainActivity extends ListeningActivity {
     }
 
     private void handleFollowing(Context context) {
-        String user = contactMock;
-
-        Multimap<String, Message> messagesByDate = this.massagesByDate(user);
+        Multimap<String, Message> messagesByDate = this.massagesByDate(currentContact);
 
         if (this.enabledConversation) {
             if (messagesByDate.size() > 0) {
@@ -287,9 +292,7 @@ public class MainActivity extends ListeningActivity {
     }
 
     private void handlePrevious(Context context) {
-        String user = contactMock;
-
-        Multimap<String, Message> messagesByDate = this.massagesByDate(user);
+        Multimap<String, Message> messagesByDate = this.massagesByDate(currentContact);
 
         if (this.enabledConversation) {
             if (messagesByDate.size() > 0) {
@@ -312,31 +315,28 @@ public class MainActivity extends ListeningActivity {
     }
 
 
-    private void handleConversation(Context context) {
-        String user = contactMock;
-
-        Multimap<String, Message> messages = this.massagesByDate(user);
+    private void handleConversation(String contact) {
+        Multimap<String, Message> messages = this.massagesByDate(contact);
         List<String> dates = Lists.newArrayList(messages.keySet());
 
         if (dates.size() > 0) {
+            currentContact = contact;
             currentMessage = -1;
             enabledConversation = true;
             String lastDate = dates.get(dates.size()-1);
             currentDate = lastDate;
-            textToSpeechService.speak("Conversación con " + user, buildStartCallback(), this);
+            textToSpeechService.speak("Conversación con " + currentContact, buildStartCallback(), this);
             textToSpeechService.speak(toPrettyString(lastDate), buildStartCallback(), this);
         } else {
-            textToSpeechService.speak("Usted no ha recibido ningún mensaje de " + user, buildStartCallback(), this);
+            textToSpeechService.speak("Usted no ha recibido ningún mensaje de " + contact, buildStartCallback(), this);
             enabledConversation = false;
         }
 
     }
 
     private void handleFollowingDay(Context context) {
-        String user = contactMock;
-
         if (this.enabledConversation) {
-            Multimap<String, Message> messagesByDate = this.massagesByDate(user);
+            Multimap<String, Message> messagesByDate = this.massagesByDate(currentContact);
             List<String> dates = Lists.newArrayList(messagesByDate.keySet());
             int datePosition = dates.indexOf(currentDate);
             if (datePosition + 1 < dates.size()) {
@@ -344,7 +344,7 @@ public class MainActivity extends ListeningActivity {
                 currentMessage = -1;
                 textToSpeechService.speak(toPrettyString(currentDate), buildStartCallback(), this);
             } else {
-                textToSpeechService.speak("Ya no hay más días de conversación con "+ user, buildStartCallback(), this);
+                textToSpeechService.speak("Ya no hay más días de conversación con "+ currentContact, buildStartCallback(), this);
             }
         } else {
             textToSpeechService.speak("El comando dia siguiente sólo puede usarse en modo conversación", buildStartCallback(), this);
@@ -352,10 +352,8 @@ public class MainActivity extends ListeningActivity {
     }
 
     private void handlePreviousDay(Context context) {
-        String user = contactMock;
-
         if (this.enabledConversation) {
-            Multimap<String, Message> messagesByDate = this.massagesByDate(user);
+            Multimap<String, Message> messagesByDate = this.massagesByDate(currentContact);
             List<String> dates = Lists.newArrayList(messagesByDate.keySet());
             int datePosition = dates.indexOf(currentDate);
             if (datePosition > 0) {
@@ -363,7 +361,7 @@ public class MainActivity extends ListeningActivity {
                 currentMessage = -1;
                 textToSpeechService.speak(toPrettyString(currentDate), buildStartCallback(), this);
             } else {
-                textToSpeechService.speak("Ya no hay días de conversación anteriores con "+ user, buildStartCallback(), this);
+                textToSpeechService.speak("Ya no hay días de conversación anteriores con "+ currentContact, buildStartCallback(), this);
             }
         } else {
             textToSpeechService.speak("El comando dia anterior sólo puede usarse en modo conversación", buildStartCallback(), this);
@@ -378,7 +376,7 @@ public class MainActivity extends ListeningActivity {
                 boolean valid = false;
 
                 for (String command : comandos) {
-                    if (input != null && input.toLowerCase().contains(command)) {
+                    if (input != null && input.toLowerCase().contains(command) || input.toLowerCase().contains("conversación con")) {
                         valid = true;
                     }
                 }

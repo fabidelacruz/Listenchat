@@ -14,7 +14,7 @@ public class StringUtils {
         return normalized(s1).equals(normalized(s2));
     }
 
-    private static String normalized(String s) {
+    public static String normalized(String s) {
         return Normalizer.normalize(trimToEmpty(s), Normalizer.Form.NFD).toLowerCase();
     }
 
