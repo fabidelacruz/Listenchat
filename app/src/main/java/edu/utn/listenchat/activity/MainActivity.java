@@ -38,7 +38,10 @@ import edu.utn.listenchat.utils.CursorUtils;
 
 import static android.Manifest.permission.RECORD_AUDIO;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.view.KeyEvent.KEYCODE_HEADSETHOOK;
 import static android.view.KeyEvent.KEYCODE_MEDIA_NEXT;
+import static android.view.KeyEvent.KEYCODE_MEDIA_PLAY;
+import static android.view.KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE;
 import static android.view.KeyEvent.KEYCODE_MEDIA_PREVIOUS;
 import static android.view.KeyEvent.KEYCODE_VOLUME_DOWN;
 import static android.view.KeyEvent.KEYCODE_VOLUME_UP;
@@ -130,6 +133,11 @@ public class MainActivity extends ListeningActivity {
             case KEYCODE_MEDIA_PREVIOUS:
             case KEYCODE_VOLUME_DOWN:
                 handlePrevious(this);
+                break;
+            case KEYCODE_MEDIA_PLAY_PAUSE:
+            case KEYCODE_MEDIA_PLAY:
+            case KEYCODE_HEADSETHOOK:
+                handleNewMessages(this);
                 break;
         }
 
