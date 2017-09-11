@@ -17,6 +17,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.google.common.base.Predicate;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 
@@ -32,9 +33,12 @@ import edu.utn.listenchat.db.MessageDao;
 import edu.utn.listenchat.listener.TextToSpeechCallaback;
 import edu.utn.listenchat.listener.VoiceRecognitionListener;
 import edu.utn.listenchat.model.Message;
+import edu.utn.listenchat.service.DummyLoader;
 import edu.utn.listenchat.service.PersistenceService;
 import edu.utn.listenchat.service.TextToSpeechService;
 import edu.utn.listenchat.utils.CursorUtils;
+import edu.utn.listenchat.utils.DateUtils;
+import edu.utn.listenchat.utils.StringUtils;
 
 import static android.Manifest.permission.RECORD_AUDIO;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -47,6 +51,8 @@ import static com.google.common.collect.Collections2.filter;
 import static com.google.common.collect.Lists.newArrayList;
 import static edu.utn.listenchat.utils.CursorUtils.convertCursorToMap;
 import static edu.utn.listenchat.utils.CursorUtils.messageIds;
+import static edu.utn.listenchat.utils.DateUtils.toDate;
+import static edu.utn.listenchat.utils.DateUtils.toPrettyString;
 import static edu.utn.listenchat.utils.DateUtils.toStringUntilDay;
 import static edu.utn.listenchat.utils.DateUtils.toStringUntilMinute;
 
@@ -63,6 +69,8 @@ public class MainActivity extends ListeningActivity {
     private static final String ENTRAR = "entrar";
     private static final String SIGUIENTE = "siguiente";
     private static final String ANTERIOR = "anterior";
+    private static final String DIA_SIGUIENTE = "día siguiente";
+    private static final String DIA_ANTERIOR = "día anterior";
 
     private TextToSpeechService textToSpeechService = new TextToSpeechService();
 
@@ -71,12 +79,15 @@ public class MainActivity extends ListeningActivity {
 
     private PersistenceService persistenceService = new PersistenceService();
     private MessageDao messageDao = new MessageDao();
+    private DummyLoader dummyLoader = new DummyLoader();
 
     ListView list;
     CustomListAdapter adapter;
 
     private int currentMessage;
     private boolean enabledConversation;
+    private String currentDate;
+    private String contactMock = "Cacho Garay";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,6 +98,11 @@ public class MainActivity extends ListeningActivity {
 
         reloadAdapter();
         checkPermissions();
+
+        Context context = this.getApplicationContext();
+        if (this.messageDao.all(context).size() == 0) {
+            this.dummyLoader.load(context);
+        }
 
         LocalBroadcastManager.getInstance(this).registerReceiver(onNotice, new IntentFilter("Listenchat-msg"));
 
@@ -169,6 +185,12 @@ public class MainActivity extends ListeningActivity {
                 case ANTERIOR:
                     this.handlePrevious(this);
                     break;
+                case DIA_SIGUIENTE:
+                    handleFollowingDay(this);
+                    break;
+                case DIA_ANTERIOR:
+                    this.handlePreviousDay(this);
+                    break;
                 default:
                     textToSpeechService.speak("Comando desconocido", buildStartCallback(), this);
                     break;
@@ -192,7 +214,7 @@ public class MainActivity extends ListeningActivity {
                     stringBuilder.append(message).append(". ");
                 }
                 Log.i("MENSAJES", stringBuilder.toString());
-                textToSpeechService.speak(stringBuilder.toString(), buildReadCallback(messageIds(cursor), this), this);
+                textToSpeechService.speak(stringBuilder.toString(), buildStartCallback(), this);
             }
         } else {
             textToSpeechService.speak("Usted no ha recibido ningún mensaje nuevo", buildStartCallback(), this);
@@ -232,21 +254,19 @@ public class MainActivity extends ListeningActivity {
     }
 
     private void handleFollowing(Context context) {
-        String user = "Fabián Cardaci";
+        String user = contactMock;
 
-        Cursor cursor = persistenceService.getAllCursor(getApplicationContext());
-
-        Multimap<String, String> allMessages = convertCursorToMap(cursor);
+        Multimap<String, Message> messagesByDate = this.massagesByDate(user);
 
         if (this.enabledConversation) {
-            if (allMessages.keySet().size() > 0) {
+            if (messagesByDate.size() > 0) {
                 StringBuilder stringBuilder = new StringBuilder();
-                List<String> userMessages = newArrayList(allMessages.get(user));
-                if (currentMessage + 1 < userMessages.size()) {
+                List<Message> dateMessages = newArrayList(messagesByDate.get(currentDate));
+                if (currentMessage + 1 < dateMessages.size()) {
                     currentMessage += 1;
-                    stringBuilder.append(userMessages.get(currentMessage)).append(". ");
+                    stringBuilder.append(dateMessages.get(currentMessage).getMessage()).append(". ");
                 } else {
-                    stringBuilder.append("No hay más mensajes siguientes");
+                    stringBuilder.append("No hay más mensajes siguientes del " + toPrettyString(currentDate));
                 }
                 Log.i("MENSAJES", stringBuilder.toString());
                 textToSpeechService.speak(stringBuilder.toString(), buildStartCallback(), this);
@@ -259,21 +279,19 @@ public class MainActivity extends ListeningActivity {
     }
 
     private void handlePrevious(Context context) {
-        String user = "Fabián Cardaci";
+        String user = contactMock;
 
-        Cursor cursor = persistenceService.getAllCursor(getApplicationContext());
-
-        Multimap<String, String> allMessages = convertCursorToMap(cursor);
+        Multimap<String, Message> messagesByDate = this.massagesByDate(user);
 
         if (this.enabledConversation) {
-            if (allMessages.keySet().size() > 0) {
+            if (messagesByDate.size() > 0) {
                 StringBuilder stringBuilder = new StringBuilder();
-                List<String> userMessages = newArrayList(allMessages.get(user));
+                List<Message> dateMessages = newArrayList(messagesByDate.get(currentDate));
                 if (currentMessage - 1 >= 0) {
                     currentMessage -= 1;
-                    stringBuilder.append(userMessages.get(currentMessage)).append(". ");
+                    stringBuilder.append(dateMessages.get(currentMessage).getMessage()).append(". ");
                 } else {
-                    stringBuilder.append("No hay más mensajes anteriores");
+                    stringBuilder.append("No hay más mensajes anteriores del " + toPrettyString(currentDate));
                 }
                 Log.i("MENSAJES", stringBuilder.toString());
                 textToSpeechService.speak(stringBuilder.toString(), buildStartCallback(), this);
@@ -287,27 +305,61 @@ public class MainActivity extends ListeningActivity {
 
 
     private void handleConversation(Context context) {
-        String user = "Fabián Cardaci";
+        String user = contactMock;
 
-        Cursor cursor = persistenceService.getAllCursor(getApplicationContext());
+        Multimap<String, Message> messages = this.massagesByDate(user);
+        List<String> dates = Lists.newArrayList(messages.keySet());
 
-        Multimap<String, String> allMessages = convertCursorToMap(cursor);
-
-        if (allMessages.keySet().size() > 0) {
-            List<String> userMessages = newArrayList(allMessages.get(user));
-            if (userMessages.size() > 0) {
-                textToSpeechService.speak("Conversación con " + user, buildStartCallback(), this);
-                currentMessage = -1;
-                this.enabledConversation = true;
-            } else {
-                textToSpeechService.speak("Usted no ha recibido mensajes de " + user, buildStartCallback(), this);
-                enabledConversation = false;
-            }
+        if (dates.size() > 0) {
+            currentMessage = -1;
+            enabledConversation = true;
+            String lastDate = dates.get(dates.size()-1);
+            currentDate = lastDate;
+            textToSpeechService.speak("Conversación con " + user, buildStartCallback(), this);
+            textToSpeechService.speak(toPrettyString(lastDate), buildStartCallback(), this);
         } else {
-            textToSpeechService.speak("Usted no ha recibido ningún mensaje", buildStartCallback(), this);
+            textToSpeechService.speak("Usted no ha recibido ningún mensaje de " + user, buildStartCallback(), this);
             enabledConversation = false;
         }
 
+    }
+
+    private void handleFollowingDay(Context context) {
+        String user = contactMock;
+
+        if (this.enabledConversation) {
+            Multimap<String, Message> messagesByDate = this.massagesByDate(user);
+            List<String> dates = Lists.newArrayList(messagesByDate.keySet());
+            int datePosition = dates.indexOf(currentDate);
+            if (datePosition + 1 < dates.size()) {
+                currentDate = dates.get(datePosition + 1);
+                currentMessage = -1;
+                textToSpeechService.speak(toPrettyString(currentDate), buildStartCallback(), this);
+            } else {
+                textToSpeechService.speak("Ya no hay más días de conversación con "+ user, buildStartCallback(), this);
+            }
+        } else {
+            textToSpeechService.speak("El comando dia siguiente sólo puede usarse en modo conversación", buildStartCallback(), this);
+        }
+    }
+
+    private void handlePreviousDay(Context context) {
+        String user = contactMock;
+
+        if (this.enabledConversation) {
+            Multimap<String, Message> messagesByDate = this.massagesByDate(user);
+            List<String> dates = Lists.newArrayList(messagesByDate.keySet());
+            int datePosition = dates.indexOf(currentDate);
+            if (datePosition > 0) {
+                currentDate = dates.get(datePosition - 1);
+                currentMessage = -1;
+                textToSpeechService.speak(toPrettyString(currentDate), buildStartCallback(), this);
+            } else {
+                textToSpeechService.speak("Ya no hay días de conversación anteriores con "+ user, buildStartCallback(), this);
+            }
+        } else {
+            textToSpeechService.speak("El comando dia anterior sólo puede usarse en modo conversación", buildStartCallback(), this);
+        }
     }
 
 
@@ -346,30 +398,23 @@ public class MainActivity extends ListeningActivity {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            String title = intent.getStringExtra("title");
+            String contact = intent.getStringExtra("title");
             String text = intent.getStringExtra("text");
 
             if (isMessengerNotification(intent)) {
                 try {
-                    Date date = new Date();
-                    String intentId = toStringUntilMinute(date) + "-" + title + "-" + text;
+                    Message message = Message.create(contact, text, new Date());
 
-                    Log.i("CONTROL", "New Intent id: " + intentId);
+                    Log.i("CONTROL", "New Intent id: " + message.getIntentId());
 
-                    if (!isDuplicated(intentId)) {
-                        Message model = new Message();
-                        model.setIntentId(intentId);
-                        model.setName(title);
-                        model.setMessage(text);
-                        model.setReceivedDate(date);
-                        model.setLeido("N");
-                        persistenceService.insert(context, model);
+                    if (!isDuplicated(message.getIntentId())) {
+                        persistenceService.insert(context, message);
                         if (list != null) {
                             reloadAdapter();
                         }
-                        Log.i("CONTROL", "Saved Intent id: " + intentId);
+                        Log.i("CONTROL", "Saved Intent id: " + message.getIntentId());
                     } else {
-                        Log.i("CONTROL", "Duplicated Intent id: " + intentId);
+                        Log.i("CONTROL", "Duplicated Intent id: " + message.getIntentId());
                     }
 
                 } catch (Exception e) {
