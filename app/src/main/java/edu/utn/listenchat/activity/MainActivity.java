@@ -17,20 +17,13 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.google.common.base.Predicate;
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ListMultimap;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Nullable;
 
@@ -41,12 +34,17 @@ import edu.utn.listenchat.listener.VoiceRecognitionListener;
 import edu.utn.listenchat.model.Message;
 import edu.utn.listenchat.service.PersistenceService;
 import edu.utn.listenchat.service.TextToSpeechService;
-import edu.utn.listenchat.utils.DateUtils;
+import edu.utn.listenchat.utils.CursorUtils;
 
 import static android.Manifest.permission.RECORD_AUDIO;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.view.KeyEvent.KEYCODE_MEDIA_NEXT;
+import static android.view.KeyEvent.KEYCODE_MEDIA_PREVIOUS;
 import static android.widget.Toast.LENGTH_LONG;
 import static com.google.common.collect.Collections2.filter;
+import static com.google.common.collect.Lists.newArrayList;
+import static edu.utn.listenchat.utils.CursorUtils.convertCursorToMap;
+import static edu.utn.listenchat.utils.CursorUtils.messageIds;
 import static edu.utn.listenchat.utils.DateUtils.toStringUntilDay;
 import static edu.utn.listenchat.utils.DateUtils.toStringUntilMinute;
 
@@ -66,7 +64,7 @@ public class MainActivity extends ListeningActivity {
 
     private TextToSpeechService textToSpeechService = new TextToSpeechService();
 
-    private List<String> comandos = Lists.newArrayList(NOVEDADES, LEER_MENSAJES_NUEVOS, CONVERSACIÓN,
+    private List<String> comandos = newArrayList(NOVEDADES, LEER_MENSAJES_NUEVOS, CONVERSACIÓN,
             ENVIAR_MENSAJE, CANCELAR, COMANDOS, AYUDA, SALIR, ENTRAR, SIGUIENTE, ANTERIOR);
 
     private PersistenceService persistenceService = new PersistenceService();
@@ -126,10 +124,10 @@ public class MainActivity extends ListeningActivity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         switch (keyCode) {
-            case KeyEvent.KEYCODE_MEDIA_NEXT:
+            case KEYCODE_MEDIA_NEXT:
                 handleFollowing(this);
                 break;
-            case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
+            case KEYCODE_MEDIA_PREVIOUS:
                 handlePrevious(this);
                 break;
         }
@@ -182,7 +180,7 @@ public class MainActivity extends ListeningActivity {
     private void handleNewMessages(Context context) {
         Cursor cursor = persistenceService.getAllCursor(getApplicationContext());
 
-        Multimap<String, String> allMessages = this.convertCursorToMap(cursor);
+        Multimap<String, String> allMessages = convertCursorToMap(cursor);
 
         if (allMessages.keySet().size() > 0) {
             for (String user : allMessages.keySet()) {
@@ -193,23 +191,37 @@ public class MainActivity extends ListeningActivity {
                     stringBuilder.append(message + ". ");
                 }
                 Log.i("MENSAJES", stringBuilder.toString());
-                textToSpeechService.speak(stringBuilder.toString(), buildStartCallback(), this);
+                textToSpeechService.speak(stringBuilder.toString(), buildReadCallback(messageIds(cursor), this), this);
             }
         } else {
             textToSpeechService.speak("Usted no ha recibido ningún mensaje nuevo", buildStartCallback(), this);
         }
     }
 
+    private TextToSpeechCallaback buildReadCallback(final List<Integer> integers, final Context context) {
+        return new TextToSpeechCallaback() {
+            @Override
+            public void onCompletion() {
+                persistenceService.markNotified(integers, context);
+            }
+
+            @Override
+            public void onErrorOccured(int errorCode) {
+                //Do nothing
+            }
+        };
+    }
+
     private void handleNovelties(Context context) {
         Cursor cursor = persistenceService.getAllCursor(getApplicationContext());
 
-        Multimap<String, String> allMessages = this.convertCursorToMap(cursor);
+        Multimap<String, String> allMessages = convertCursorToMap(cursor);
 
         if (allMessages.keySet().size() > 0) {
             for (String user : allMessages.keySet()) {
                 StringBuilder stringBuilder = new StringBuilder();
                 Collection<String> userMessages = allMessages.get(user);
-                stringBuilder.append(userMessages.size() + " mensajes recibidos de "+ user + ". ");
+                stringBuilder.append(userMessages.size()).append(" mensajes recibidos de ").append(user).append(". ");
                 Log.i("MENSAJES", stringBuilder.toString());
                 textToSpeechService.speak(stringBuilder.toString(), buildStartCallback(), this);
             }
@@ -223,15 +235,15 @@ public class MainActivity extends ListeningActivity {
 
         Cursor cursor = persistenceService.getAllCursor(getApplicationContext());
 
-        Multimap<String, String> allMessages = this.convertCursorToMap(cursor);
+        Multimap<String, String> allMessages = convertCursorToMap(cursor);
 
         if (this.enabledConversation) {
             if (allMessages.keySet().size() > 0) {
                 StringBuilder stringBuilder = new StringBuilder();
-                List<String> userMessages = Lists.newArrayList(allMessages.get(user));
+                List<String> userMessages = newArrayList(allMessages.get(user));
                 if (currentMessage + 1 < userMessages.size()) {
                     currentMessage += 1;
-                    stringBuilder.append(userMessages.get(currentMessage) + ". ");
+                    stringBuilder.append(userMessages.get(currentMessage)).append(". ");
                 } else {
                     stringBuilder.append("No hay más mensajes siguientes");
                 }
@@ -250,15 +262,15 @@ public class MainActivity extends ListeningActivity {
 
         Cursor cursor = persistenceService.getAllCursor(getApplicationContext());
 
-        Multimap<String, String> allMessages = this.convertCursorToMap(cursor);
+        Multimap<String, String> allMessages = convertCursorToMap(cursor);
 
         if (this.enabledConversation) {
             if (allMessages.keySet().size() > 0) {
                 StringBuilder stringBuilder = new StringBuilder();
-                List<String> userMessages = Lists.newArrayList(allMessages.get(user));
+                List<String> userMessages = newArrayList(allMessages.get(user));
                 if (currentMessage - 1 >= 0) {
                     currentMessage -= 1;
-                    stringBuilder.append(userMessages.get(currentMessage) + ". ");
+                    stringBuilder.append(userMessages.get(currentMessage)).append(". ");
                 } else {
                     stringBuilder.append("No hay más mensajes anteriores");
                 }
@@ -278,11 +290,10 @@ public class MainActivity extends ListeningActivity {
 
         Cursor cursor = persistenceService.getAllCursor(getApplicationContext());
 
-        Multimap<String, String> allMessages = this.convertCursorToMap(cursor);
+        Multimap<String, String> allMessages = convertCursorToMap(cursor);
 
         if (allMessages.keySet().size() > 0) {
-            StringBuilder stringBuilder = new StringBuilder();
-            List<String> userMessages = Lists.newArrayList(allMessages.get(user));
+            List<String> userMessages = newArrayList(allMessages.get(user));
             if (userMessages.size() > 0) {
                 textToSpeechService.speak("Conversación con " + user, buildStartCallback(), this);
                 currentMessage = -1;
@@ -300,7 +311,7 @@ public class MainActivity extends ListeningActivity {
 
 
     private List<String> filterCommands(String[] voiceCommands) {
-        return Lists.newArrayList(filter(Arrays.asList(voiceCommands), new Predicate<String>() {
+        return newArrayList(filter(Arrays.asList(voiceCommands), new Predicate<String>() {
             @Override
             public boolean apply(@Nullable String input) {
                 boolean valid = false;
@@ -369,18 +380,6 @@ public class MainActivity extends ListeningActivity {
 
     private static boolean isMessengerNotification(Intent intent) {
         return "com.facebook.orca".equals(intent.getStringExtra("package"));
-    }
-
-    private Multimap<String, String> convertCursorToMap(Cursor cursor) {
-        Multimap<String, String> map = ArrayListMultimap.create();
-        if (cursor.moveToFirst()) {
-            do {
-                String contact = cursor.getString(2);
-                String message = cursor.getString(3);
-                map.put(contact, message);
-            } while(cursor.moveToNext());
-        }
-        return map;
     }
 
     private Multimap<String, Message> massagesByDate(String contact) {

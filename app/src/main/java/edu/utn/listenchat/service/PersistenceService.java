@@ -6,6 +6,10 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.text.format.DateFormat;
 
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.List;
+
 import edu.utn.listenchat.db.ListenchatDbHelper;
 import edu.utn.listenchat.db.MessageContract.MessageEntry;
 import edu.utn.listenchat.model.Message;
@@ -35,5 +39,9 @@ public class PersistenceService {
 
     public Cursor getAllCursor(Context context) {
         return new ListenchatDbHelper(context).getWritableDatabase().rawQuery("SELECT * FROM " + TABLE_NAME, null);
+    }
+
+    public void markNotified(List<Integer> integers, Context context) {
+        new ListenchatDbHelper(context).getWritableDatabase().rawQuery("UPDATE " + TABLE_NAME + "SET leido = 'Y' WHERE _id IN (" + StringUtils.join(integers, ",") + ")", null);
     }
 }
