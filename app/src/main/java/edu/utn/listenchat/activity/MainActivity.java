@@ -31,14 +31,13 @@ import javax.annotation.Nullable;
 import edu.utn.listenchat.R;
 import edu.utn.listenchat.db.MessageDao;
 import edu.utn.listenchat.listener.TextToSpeechCallaback;
-import edu.utn.listenchat.listener.VoiceRecognitionListener;
+import edu.utn.listenchat.model.MenuStep;
+import edu.utn.listenchat.model.Step;
 import edu.utn.listenchat.model.Message;
+import edu.utn.listenchat.model.Substep;
 import edu.utn.listenchat.service.DummyLoader;
 import edu.utn.listenchat.service.PersistenceService;
 import edu.utn.listenchat.service.TextToSpeechService;
-import edu.utn.listenchat.utils.CursorUtils;
-import edu.utn.listenchat.utils.DateUtils;
-import edu.utn.listenchat.utils.StringUtils;
 
 import static android.Manifest.permission.RECORD_AUDIO;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -53,11 +52,8 @@ import static android.widget.Toast.LENGTH_LONG;
 import static com.google.common.collect.Collections2.filter;
 import static com.google.common.collect.Lists.newArrayList;
 import static edu.utn.listenchat.utils.CursorUtils.convertCursorToMap;
-import static edu.utn.listenchat.utils.CursorUtils.messageIds;
-import static edu.utn.listenchat.utils.DateUtils.toDate;
 import static edu.utn.listenchat.utils.DateUtils.toPrettyString;
 import static edu.utn.listenchat.utils.DateUtils.toStringUntilDay;
-import static edu.utn.listenchat.utils.DateUtils.toStringUntilMinute;
 import static org.apache.commons.lang3.StringUtils.replace;
 
 public class MainActivity extends ListeningActivity {
@@ -92,6 +88,8 @@ public class MainActivity extends ListeningActivity {
     private boolean enabledConversation;
     private String currentDate;
     private String currentContact = "Cacho Garay";
+
+    private MenuStep step;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -142,20 +140,121 @@ public class MainActivity extends ListeningActivity {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
+        boolean processed = false;
+
         switch (keyCode) {
             case KEYCODE_MEDIA_NEXT:
             case KEYCODE_VOLUME_UP:
-                handleFollowing(this);
+                processed = handleNextButton();
                 break;
             case KEYCODE_MEDIA_PREVIOUS:
             case KEYCODE_VOLUME_DOWN:
-                handlePrevious(this);
+                processed = handlePreviousButton();
                 break;
             case KEYCODE_MEDIA_PLAY_PAUSE:
             case KEYCODE_MEDIA_PLAY:
             case KEYCODE_HEADSETHOOK:
-                //Do navigation
+                processed = handleOkButton();
                 break;
+        }
+
+        return processed || super.onKeyDown(keyCode, event);
+    }
+
+    private boolean handlePreviousButton() {
+        if (step == null) {
+            return false;
+        }
+
+        if (Step.CONVERSATION.equals(this.step.getStep())) {
+            if (Substep.SELECT_CONTACT.equals(this.step.getSubstep())) {
+                previousContact();
+            } else {
+                handlePrevious(this);
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private void previousContact() {
+        List<String> contacts = this.persistenceService.getContacts(this);
+
+        if (!contacts.isEmpty()) {
+            if (this.step.getContact() == null) {
+                step.setContact(contacts.get(0));
+            } else {
+                int idx = contacts.indexOf(this.step.getContact()) - 1;
+                this.step.setContact(idx >= 0 ? contacts.get(idx) : contacts.get(contacts.size() - 1));
+            }
+
+            textToSpeechService.speak(this.step.getContact(), buildStartCallback(), this);
+        } else {
+            textToSpeechService.speak("No hay contactos", buildStartCallback(), this);
+            this.step = null;
+        }
+
+    }
+
+    private boolean handleNextButton() {
+        if (step == null) {
+            return false;
+        }
+
+        if (Step.CONVERSATION.equals(this.step.getStep())) {
+            if (Substep.SELECT_CONTACT.equals(this.step.getSubstep())) {
+                nextContact();
+            } else {
+                handleFollowing(this);
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private void nextContact() {
+        List<String> contacts = this.persistenceService.getContacts(this);
+
+        if (!contacts.isEmpty()) {
+            if (this.step.getContact() == null) {
+                step.setContact(contacts.get(0));
+            } else {
+                int idx = contacts.indexOf(this.step.getContact()) + 1;
+                this.step.setContact(idx < contacts.size() ? contacts.get(idx) : contacts.get(0));
+            }
+
+            textToSpeechService.speak(this.step.getContact(), buildStartCallback(), this);
+        } else {
+            textToSpeechService.speak("No hay contactos", buildStartCallback(), this);
+            this.step = null;
+        }
+    }
+
+    private boolean handleOkButton() {
+        if (this.step == null) {
+            step = new MenuStep();
+            step.setStep(Step.MAIN);
+            step.setSubstep(Substep.MESSAGES);
+            textToSpeechService.speak(step.getSubstep().getDescription(), buildStartCallback(), this);
+        } else {
+            if (Substep.NOVELTIES.equals(this.step.getSubstep())) {
+                this.handleNovelties(this);
+                this.step = null;
+            }
+
+            if (Substep.MESSAGES.equals(this.step.getSubstep())) {
+                this.handleNewMessages(this);
+                this.step = null;
+            }
+
+            if (Substep.CONVERSATION.equals(this.step.getSubstep())) {
+                this.step.setSubstep(Substep.SELECT_CONTACT);
+                this.step.setStep(Step.CONVERSATION);
+            }
         }
 
         return true;

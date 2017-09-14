@@ -6,15 +6,19 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.text.format.DateFormat;
 
+import com.google.common.collect.Lists;
+
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 
+import edu.utn.listenchat.activity.MainActivity;
 import edu.utn.listenchat.db.ListenchatDbHelper;
 import edu.utn.listenchat.db.MessageContract.MessageEntry;
 import edu.utn.listenchat.model.Message;
 import edu.utn.listenchat.utils.DateUtils;
 
+import static edu.utn.listenchat.db.MessageContract.MessageEntry.COLUMN_NAME_CONTACT;
 import static edu.utn.listenchat.db.MessageContract.MessageEntry.COLUMN_NAME_LEIDO;
 import static edu.utn.listenchat.db.MessageContract.MessageEntry.TABLE_NAME;
 import static org.apache.commons.lang3.StringUtils.join;
@@ -56,5 +60,23 @@ public class PersistenceService {
 
     public Cursor getNewsCursor(Context context) {
         return new ListenchatDbHelper(context).getWritableDatabase().rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE " + COLUMN_NAME_LEIDO + " = 'N'", null);
+    }
+
+    public List<String> getContacts(Context context) {
+        List<String> contacts = Lists.newArrayList();
+
+        Cursor cursor = new ListenchatDbHelper(context).getWritableDatabase().rawQuery("SELECT distinct + " + COLUMN_NAME_CONTACT + " FROM " + TABLE_NAME, null);
+
+        if (cursor.getCount() > 0) {
+            cursor.moveToNext();
+
+            do {
+                contacts.add(cursor.getString(0));
+            }while(cursor.moveToNext());
+        }
+
+        cursor.close();
+
+        return contacts;
     }
 }
