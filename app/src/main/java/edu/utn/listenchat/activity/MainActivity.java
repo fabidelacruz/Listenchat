@@ -51,6 +51,8 @@ import static android.view.KeyEvent.KEYCODE_VOLUME_UP;
 import static android.widget.Toast.LENGTH_LONG;
 import static com.google.common.collect.Collections2.filter;
 import static com.google.common.collect.Lists.newArrayList;
+import static edu.utn.listenchat.model.Step.CONVERSATION;
+import static edu.utn.listenchat.model.Substep.SELECT_CONTACT;
 import static edu.utn.listenchat.utils.CursorUtils.convertCursorToMap;
 import static edu.utn.listenchat.utils.DateUtils.toPrettyString;
 import static edu.utn.listenchat.utils.DateUtils.toStringUntilDay;
@@ -166,8 +168,15 @@ public class MainActivity extends ListeningActivity {
             return false;
         }
 
-        if (Step.CONVERSATION.equals(this.step.getStep())) {
-            if (Substep.SELECT_CONTACT.equals(this.step.getSubstep())) {
+        if (Step.MAIN.equals(this.step.getStep())) {
+            Substep previous = Substep.previous(this.step.getSubstep());
+            this.step.setSubstep(previous);
+            this.textToSpeechService.speak(previous.getDescription(), buildStartCallback(),this);
+            return true;
+        }
+
+        if (CONVERSATION.equals(this.step.getStep())) {
+            if (SELECT_CONTACT.equals(this.step.getSubstep())) {
                 previousContact();
             } else {
                 handlePrevious(this);
@@ -203,8 +212,15 @@ public class MainActivity extends ListeningActivity {
             return false;
         }
 
-        if (Step.CONVERSATION.equals(this.step.getStep())) {
-            if (Substep.SELECT_CONTACT.equals(this.step.getSubstep())) {
+        if (Step.MAIN.equals(this.step.getStep())) {
+            Substep next = Substep.next(this.step.getSubstep());
+            this.step.setSubstep(next);
+            this.textToSpeechService.speak(next.getDescription(), buildStartCallback(),this);
+            return true;
+        }
+
+        if (CONVERSATION.equals(this.step.getStep())) {
+            if (SELECT_CONTACT.equals(this.step.getSubstep())) {
                 nextContact();
             } else {
                 handleFollowing(this);
@@ -241,20 +257,32 @@ public class MainActivity extends ListeningActivity {
             step.setSubstep(Substep.MESSAGES);
             textToSpeechService.speak(step.getSubstep().getDescription(), buildStartCallback(), this);
         } else {
-            if (Substep.NOVELTIES.equals(this.step.getSubstep())) {
-                this.handleNovelties(this);
-                this.step = null;
+            if (Step.MAIN.equals(step.getStep())) {
+                switch (this.step.getSubstep()) {
+                    case NOVELTIES:
+                        this.handleNovelties(this);
+                        this.step = null;
+                        break;
+
+                    case MESSAGES:
+                        this.handleNewMessages(this);
+                        this.step = null;
+                        break;
+
+                    case CONVERSATION:
+                        this.step.setSubstep(SELECT_CONTACT);
+                        this.step.setStep(CONVERSATION);
+                        this.textToSpeechService.speak(SELECT_CONTACT.getDescription(), buildStartCallback(), this);
+                        break;
+                }
             }
 
-            if (Substep.MESSAGES.equals(this.step.getSubstep())) {
-                this.handleNewMessages(this);
-                this.step = null;
+            if (CONVERSATION.equals(step.getStep()) && SELECT_CONTACT.equals(step.getSubstep())
+                    && step.getContact() != null) {
+                this.step.setSubstep(Substep.READ);
+                this.handleConversation(step.getContact());
             }
 
-            if (Substep.CONVERSATION.equals(this.step.getSubstep())) {
-                this.step.setSubstep(Substep.SELECT_CONTACT);
-                this.step.setStep(Step.CONVERSATION);
-            }
         }
 
         return true;
