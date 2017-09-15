@@ -93,6 +93,8 @@ public class MainActivity extends ListeningActivity {
 
     private MenuStep step;
 
+    private boolean shortPress = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -141,6 +143,18 @@ public class MainActivity extends ListeningActivity {
     }
 
     @Override
+    public boolean onKeyLongPress(int keyCode, KeyEvent event) {
+        if (keyCode == KEYCODE_HEADSETHOOK || keyCode == KEYCODE_MEDIA_PLAY || keyCode == KEYCODE_MEDIA_PLAY_PAUSE) {
+            shortPress = false;
+            this.step = null;
+            this.handleOkButton();
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         boolean processed = false;
 
@@ -156,17 +170,34 @@ public class MainActivity extends ListeningActivity {
             case KEYCODE_MEDIA_PLAY_PAUSE:
             case KEYCODE_MEDIA_PLAY:
             case KEYCODE_HEADSETHOOK:
-                processed = handleOkButton();
-                break;
+                event.startTracking();
+                if(event.getRepeatCount() == 0){
+                    shortPress = true;
+                }
+                return true;
         }
 
         return processed || super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (keyCode == KEYCODE_HEADSETHOOK || keyCode == KEYCODE_MEDIA_PLAY || keyCode == KEYCODE_MEDIA_PLAY_PAUSE) {
+            if(shortPress){
+                handleOkButton();
+            }
+            shortPress = false;
+            return true;
+        }
+        return super.onKeyUp(keyCode, event);
     }
 
     private boolean handlePreviousButton() {
         if (step == null) {
             return false;
         }
+
+        textToSpeechService.stop();
 
         if (Step.MAIN.equals(this.step.getStep())) {
             Substep previous = Substep.previous(this.step.getSubstep());
@@ -212,6 +243,8 @@ public class MainActivity extends ListeningActivity {
             return false;
         }
 
+        textToSpeechService.stop();
+
         if (Step.MAIN.equals(this.step.getStep())) {
             Substep next = Substep.next(this.step.getSubstep());
             this.step.setSubstep(next);
@@ -251,10 +284,13 @@ public class MainActivity extends ListeningActivity {
     }
 
     private boolean handleOkButton() {
+        textToSpeechService.stop();
+
         if (this.step == null) {
             step = new MenuStep();
             step.setStep(Step.MAIN);
             step.setSubstep(Substep.MESSAGES);
+            textToSpeechService.speak("Menú principal", buildStartCallback(), this);
             textToSpeechService.speak(step.getSubstep().getDescription(), buildStartCallback(), this);
         } else {
             if (Step.MAIN.equals(step.getStep())) {
@@ -275,9 +311,7 @@ public class MainActivity extends ListeningActivity {
                         this.textToSpeechService.speak(SELECT_CONTACT.getDescription(), buildStartCallback(), this);
                         break;
                 }
-            }
-
-            if (CONVERSATION.equals(step.getStep()) && SELECT_CONTACT.equals(step.getSubstep())
+            }else if (CONVERSATION.equals(step.getStep()) && SELECT_CONTACT.equals(step.getSubstep())
                     && step.getContact() != null) {
                 this.step.setSubstep(Substep.READ);
                 this.handleConversation(step.getContact());

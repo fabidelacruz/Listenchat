@@ -105,6 +105,10 @@ public class TextToSpeechService {
         String utteranceId = text.hashCode() + "";
         textToSpeech.speak(text, TextToSpeech.QUEUE_ADD, null, utteranceId);
         textToSpeechCallaback.onCompletion();
-    } 
- 
-} 
+    }
+
+    public void stop() {
+        textToSpeech.stop();
+        queue.clear();
+    }
+}
