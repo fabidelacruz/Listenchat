@@ -2,10 +2,12 @@ package edu.utn.listenchat.activity;
 
 import android.Manifest;
 import android.content.BroadcastReceiver;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
@@ -113,6 +115,24 @@ public class MainActivity extends ListeningActivity {
         LocalBroadcastManager.getInstance(this).registerReceiver(onNotice, new IntentFilter("Listenchat-msg"));
 
         textToSpeechService.speak(getString(R.string.welcome_message), buildStartCallback(), this);
+    }
+
+    private void send(String message, int id) {
+        //Uri uri = Uri.parse("fb-messenger://user/");
+        //uri = ContentUris.withAppendedId(uri,id);
+        //Intent intent = new Intent(Intent.ACTION_SEND, uri);
+
+        Intent sendIntent = new Intent();
+        sendIntent.setAction(Intent.ACTION_SEND);
+        sendIntent.putExtra(Intent.EXTRA_TEXT, message);
+        sendIntent.setType("text/plain");
+        sendIntent.setPackage("com.facebook.orca");
+
+        try {
+            startActivity(sendIntent);
+        } catch (android.content.ActivityNotFoundException ex) {
+            Toast.makeText(this, "Please Install Facebook Messenger",LENGTH_LONG).show();
+        }
     }
 
     private void checkPermissions() {
@@ -570,6 +590,7 @@ public class MainActivity extends ListeningActivity {
 
             if (isMessengerNotification(intent)) {
                 try {
+                    send("Hola", 0);
                     Message message = Message.create(contact, text, new Date());
 
                     Log.i("CONTROL", "New Intent id: " + message.getIntentId());
