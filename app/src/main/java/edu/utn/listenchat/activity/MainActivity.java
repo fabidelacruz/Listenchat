@@ -2,12 +2,10 @@ package edu.utn.listenchat.activity;
 
 import android.Manifest;
 import android.content.BroadcastReceiver;
-import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
@@ -34,8 +32,8 @@ import edu.utn.listenchat.R;
 import edu.utn.listenchat.db.MessageDao;
 import edu.utn.listenchat.listener.TextToSpeechCallaback;
 import edu.utn.listenchat.model.MenuStep;
-import edu.utn.listenchat.model.Step;
 import edu.utn.listenchat.model.Message;
+import edu.utn.listenchat.model.Step;
 import edu.utn.listenchat.model.Substep;
 import edu.utn.listenchat.service.DummyLoader;
 import edu.utn.listenchat.service.PersistenceService;
@@ -75,11 +73,13 @@ public class MainActivity extends ListeningActivity {
     private static final String ANTERIOR = "anterior";
     private static final String DIA_SIGUIENTE = "día siguiente";
     private static final String DIA_ANTERIOR = "día anterior";
+    private static final String SI = "si";
+    private static final String NO = "no";
 
     private TextToSpeechService textToSpeechService = new TextToSpeechService();
 
     private List<String> comandos = newArrayList(NOVEDADES, LEER_MENSAJES_NUEVOS, CONVERSACIÓN,
-            ENVIAR_MENSAJE, CANCELAR, COMANDOS, AYUDA, SALIR, ENTRAR, SIGUIENTE, ANTERIOR);
+            ENVIAR_MENSAJE, CANCELAR, COMANDOS, AYUDA, SALIR, ENTRAR, SIGUIENTE, ANTERIOR, SI, NO);
 
     private PersistenceService persistenceService = new PersistenceService();
     private MessageDao messageDao = new MessageDao();
@@ -90,6 +90,9 @@ public class MainActivity extends ListeningActivity {
 
     private int currentMessage;
     private boolean enabledConversation;
+    private boolean enabledEnviar;
+    private boolean grabado;
+    String mensajeSend;
     private String currentDate;
     private String currentContact = "Cacho Garay";
 
@@ -346,7 +349,7 @@ public class MainActivity extends ListeningActivity {
     public void processVoiceCommands(String... voiceCommands) {
         List<String> filtered = filterCommands(voiceCommands);
 
-        if (!filtered.isEmpty()) {
+        if (!filtered.isEmpty() && !enabledEnviar) {
             switch (filtered.get(0).toLowerCase()) {
                 case NOVEDADES:
                     handleNovelties(this);
@@ -355,6 +358,7 @@ public class MainActivity extends ListeningActivity {
                     handleNewMessages(this);
                     break;
                 case ENVIAR_MENSAJE:
+                    handleEnviar(this);
                     break;
                 case CANCELAR:
                     break;
@@ -383,8 +387,46 @@ public class MainActivity extends ListeningActivity {
                     break;
             }
         }
+        //si enabledEnviar esta activo (se debe grabar un mensaje o ya se grabo) entra aca
+        //si fue grabado el mensaje se fija si el usuario quiere enviarlo, grabarlo de nuevo o cancelar
+        if(enabledEnviar && grabado){
+            switch(filtered.get(0).toLowerCase()) {
+                case SI:
+                    grabado = false;
+                    enabledEnviar = false;
+                    send(mensajeSend, 1);
+                    break;
+                case NO:
+                    grabado = false;
+                    textToSpeechService.speak("Vuelva a grabar su mensaje", buildStartCallback(), this);
+                    break;
+                case CANCELAR:
+                    grabado = false;
+                    enabledEnviar = false;
+                    textToSpeechService.speak("Envío cancelado", buildStartCallback(), this);
+                default:
+                    //????
+                    break;
+            }
+        //si el mensaje a enviar esta siendo grabado
+        }else if(enabledEnviar){
+            mensajeSend = filtered.get(0).toLowerCase();
+            grabado = true;
+            handleEnviar(this);
+        }
 
         restartListeningService();
+    }
+
+    private void handleEnviar(Context context) {
+        if (!enabledEnviar) {
+            this.enabledEnviar = true;
+            textToSpeechService.speak("Grabe su mensaje", buildStartCallback(), this);
+        }else{
+            textToSpeechService.speak("Su mensaje es", buildStartCallback(), this);
+            textToSpeechService.speak(mensajeSend, buildStartCallback(), this);
+            textToSpeechService.speak("Desea enviarlo, si no o cancelar", buildStartCallback(), this);
+        }
     }
 
     private void handleDefault(String command) {
