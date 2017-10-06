@@ -73,13 +73,11 @@ public class MainActivity extends ListeningActivity {
     private static final String ANTERIOR = "anterior";
     private static final String DIA_SIGUIENTE = "día siguiente";
     private static final String DIA_ANTERIOR = "día anterior";
-    private static final String SI = "si";
-    private static final String NO = "no";
 
     private TextToSpeechService textToSpeechService = new TextToSpeechService();
 
     private List<String> comandos = newArrayList(NOVEDADES, LEER_MENSAJES_NUEVOS, CONVERSACIÓN,
-            ENVIAR_MENSAJE, CANCELAR, COMANDOS, AYUDA, SALIR, ENTRAR, SIGUIENTE, ANTERIOR, SI, NO);
+            ENVIAR_MENSAJE, CANCELAR, COMANDOS, AYUDA, SALIR, ENTRAR, SIGUIENTE, ANTERIOR);
 
     private PersistenceService persistenceService = new PersistenceService();
     private MessageDao messageDao = new MessageDao();
@@ -90,9 +88,7 @@ public class MainActivity extends ListeningActivity {
 
     private int currentMessage;
     private boolean enabledConversation;
-    private boolean enabledEnviar;
-    private boolean grabado;
-    String mensajeSend;
+    private boolean sendingMessage = false;
     private String currentDate;
     private String currentContact = "Cacho Garay";
 
@@ -349,84 +345,65 @@ public class MainActivity extends ListeningActivity {
     public void processVoiceCommands(String... voiceCommands) {
         List<String> filtered = filterCommands(voiceCommands);
 
-        if (!filtered.isEmpty() && !enabledEnviar) {
-            switch (filtered.get(0).toLowerCase()) {
-                case NOVEDADES:
-                    handleNovelties(this);
-                    break;
-                case LEER_MENSAJES_NUEVOS:
-                    handleNewMessages(this);
-                    break;
-                case ENVIAR_MENSAJE:
-                    handleEnviar(this);
-                    break;
-                case CANCELAR:
-                    break;
-                case COMANDOS:
-                    break;
-                case AYUDA:
-                    break;
-                case SALIR:
-                    break;
-                case ENTRAR:
-                    break;
-                case SIGUIENTE:
-                    handleFollowing(this);
-                    break;
-                case ANTERIOR:
-                    this.handlePrevious(this);
-                    break;
-                case DIA_SIGUIENTE:
-                    handleFollowingDay(this);
-                    break;
-                case DIA_ANTERIOR:
-                    this.handlePreviousDay(this);
-                    break;
-                default:
-                    this.handleDefault(filtered.get(0).toLowerCase());
-                    break;
+        if (!filtered.isEmpty()) {
+            if (this.sendingMessage) {
+                this.handlePerformSendMessage(filtered.get(0).toLowerCase());
+            } else {
+                switch (filtered.get(0).toLowerCase()) {
+                    case NOVEDADES:
+                        handleNovelties(this);
+                        break;
+                    case LEER_MENSAJES_NUEVOS:
+                        handleNewMessages(this);
+                        break;
+                    case ENVIAR_MENSAJE:
+                        this.handlePrepareSendMessage();
+                        break;
+                    case CANCELAR:
+                        break;
+                    case COMANDOS:
+                        break;
+                    case AYUDA:
+                        break;
+                    case SALIR:
+                        break;
+                    case ENTRAR:
+                        break;
+                    case SIGUIENTE:
+                        handleFollowing(this);
+                        break;
+                    case ANTERIOR:
+                        this.handlePrevious(this);
+                        break;
+                    case DIA_SIGUIENTE:
+                        handleFollowingDay(this);
+                        break;
+                    case DIA_ANTERIOR:
+                        this.handlePreviousDay(this);
+                        break;
+                    default:
+                        this.handleDefault(filtered.get(0).toLowerCase());
+                        break;
+                }
+
             }
-        }
-        //si enabledEnviar esta activo (se debe grabar un mensaje o ya se grabo) entra aca
-        //si fue grabado el mensaje se fija si el usuario quiere enviarlo, grabarlo de nuevo o cancelar
-        if(enabledEnviar && grabado){
-            switch(filtered.get(0).toLowerCase()) {
-                case SI:
-                    grabado = false;
-                    enabledEnviar = false;
-                    send(mensajeSend, 1);
-                    break;
-                case NO:
-                    grabado = false;
-                    textToSpeechService.speak("Vuelva a grabar su mensaje", buildStartCallback(), this);
-                    break;
-                case CANCELAR:
-                    grabado = false;
-                    enabledEnviar = false;
-                    textToSpeechService.speak("Envío cancelado", buildStartCallback(), this);
-                default:
-                    //????
-                    break;
-            }
-        //si el mensaje a enviar esta siendo grabado
-        }else if(enabledEnviar){
-            mensajeSend = filtered.get(0).toLowerCase();
-            grabado = true;
-            handleEnviar(this);
         }
 
         restartListeningService();
     }
 
-    private void handleEnviar(Context context) {
-        if (!enabledEnviar) {
-            this.enabledEnviar = true;
-            textToSpeechService.speak("Grabe su mensaje", buildStartCallback(), this);
-        }else{
-            textToSpeechService.speak("Su mensaje es", buildStartCallback(), this);
-            textToSpeechService.speak(mensajeSend, buildStartCallback(), this);
-            textToSpeechService.speak("Desea enviarlo, si no o cancelar", buildStartCallback(), this);
+    private void handlePrepareSendMessage() {
+        sendingMessage = true;
+        textToSpeechService.speak("Diga", buildStartCallback(), this);
+    }
+
+    private void handlePerformSendMessage(String message) {
+        if ("cancelar".equalsIgnoreCase(message)) {
+            textToSpeechService.speak("Envío cancelado", buildStartCallback(), this);
+        } else {
+            this.send(message, 0);
         }
+        sendingMessage = false;
     }
 
     private void handleDefault(String command) {
@@ -593,6 +570,10 @@ public class MainActivity extends ListeningActivity {
 
 
     private List<String> filterCommands(String[] voiceCommands) {
+        if (this.sendingMessage) {
+            return newArrayList(voiceCommands);
+        }
+
         return newArrayList(filter(Arrays.asList(voiceCommands), new Predicate<String>() {
             @Override
             public boolean apply(@Nullable String input) {
