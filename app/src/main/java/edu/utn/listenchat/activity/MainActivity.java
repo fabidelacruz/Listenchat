@@ -90,6 +90,7 @@ public class MainActivity extends ListeningActivity {
 
     private int currentMessage;
     private boolean enabledConversation;
+    private boolean sendingMessage = false;
     private String currentDate;
     private String currentContact = "Cacho Garay";
 
@@ -347,44 +348,64 @@ public class MainActivity extends ListeningActivity {
         List<String> filtered = filterCommands(voiceCommands);
 
         if (!filtered.isEmpty()) {
-            switch (filtered.get(0).toLowerCase()) {
-                case NOVEDADES:
-                    handleNovelties(this);
-                    break;
-                case LEER_MENSAJES_NUEVOS:
-                    handleNewMessages(this);
-                    break;
-                case ENVIAR_MENSAJE:
-                    break;
-                case CANCELAR:
-                    break;
-                case COMANDOS:
-                    break;
-                case AYUDA:
-                    break;
-                case SALIR:
-                    break;
-                case ENTRAR:
-                    break;
-                case SIGUIENTE:
-                    handleFollowing(this);
-                    break;
-                case ANTERIOR:
-                    this.handlePrevious(this);
-                    break;
-                case DIA_SIGUIENTE:
-                    handleFollowingDay(this);
-                    break;
-                case DIA_ANTERIOR:
-                    this.handlePreviousDay(this);
-                    break;
-                default:
-                    this.handleDefault(filtered.get(0).toLowerCase());
-                    break;
+            if (this.sendingMessage) {
+                this.handlePerformSendMessage(filtered.get(0).toLowerCase());
+            } else {
+                switch (filtered.get(0).toLowerCase()) {
+                    case NOVEDADES:
+                        handleNovelties(this);
+                        break;
+                    case LEER_MENSAJES_NUEVOS:
+                        handleNewMessages(this);
+                        break;
+                    case ENVIAR_MENSAJE:
+                        this.handlePrepareSendMessage();
+                        break;
+                    case CANCELAR:
+                        break;
+                    case COMANDOS:
+                        break;
+                    case AYUDA:
+                        break;
+                    case SALIR:
+                        break;
+                    case ENTRAR:
+                        break;
+                    case SIGUIENTE:
+                        handleFollowing(this);
+                        break;
+                    case ANTERIOR:
+                        this.handlePrevious(this);
+                        break;
+                    case DIA_SIGUIENTE:
+                        handleFollowingDay(this);
+                        break;
+                    case DIA_ANTERIOR:
+                        this.handlePreviousDay(this);
+                        break;
+                    default:
+                        this.handleDefault(filtered.get(0).toLowerCase());
+                        break;
+                }
+
             }
         }
 
         restartListeningService();
+    }
+
+    private void handlePrepareSendMessage() {
+        sendingMessage = true;
+        textToSpeechService.speak("Diga", buildStartCallback(), this);
+    }
+
+    private void handlePerformSendMessage(String message) {
+        if ("cancelar".equalsIgnoreCase(message)) {
+            textToSpeechService.speak("Envío cancelado", buildStartCallback(), this);
+        } else {
+            this.send(message, 0);
+        }
+        sendingMessage = false;
     }
 
     private void handleDefault(String command) {
@@ -551,6 +572,10 @@ public class MainActivity extends ListeningActivity {
 
 
     private List<String> filterCommands(String[] voiceCommands) {
+        if (this.sendingMessage) {
+            return newArrayList(voiceCommands);
+        }
+
         return newArrayList(filter(Arrays.asList(voiceCommands), new Predicate<String>() {
             @Override
             public boolean apply(@Nullable String input) {
