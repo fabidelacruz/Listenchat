@@ -2,6 +2,8 @@ package edu.utn.listenchat.model;
 
 import java.util.Date;
 
+import edu.utn.listenchat.utils.StringUtils;
+
 import static edu.utn.listenchat.utils.DateUtils.toStringUntilMinute;
 import static java.lang.String.format;
 
@@ -12,15 +14,17 @@ public class Message {
     private String message;
     private String leido;
     private Date receivedDate;
+    private String direction;
 
-    public static Message create(String contact, String text, Date date) {
+    public static Message create(String contact, String text, Date date, String direction) {
         Message message = new Message();
 
         message.setIntentId(format("%s-%s-%s", toStringUntilMinute(date), contact, text));
-        message.setName(contact);
+        message.setName(StringUtils.normalized(contact));
         message.setMessage(text);
         message.setReceivedDate(date);
         message.setLeido("N");
+        message.setDirection(direction);
 
         return message;
     }
@@ -63,6 +67,14 @@ public class Message {
 
     public void setReceivedDate(Date receivedDate) {
         this.receivedDate = receivedDate;
+    }
+
+    public String getDirection() {
+        return direction;
+    }
+
+    public void setDirection(String direction) {
+        this.direction = direction;
     }
 }
 

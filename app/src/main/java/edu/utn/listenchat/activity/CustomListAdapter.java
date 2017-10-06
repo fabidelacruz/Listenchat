@@ -26,9 +26,10 @@ public class CustomListAdapter extends CursorAdapter {
     public void bindView(View view, Context context, Cursor cursor) {
         String name = cursor.getString(cursor.getColumnIndex(MessageContract.MessageEntry.COLUMN_NAME_CONTACT));
         String message = cursor.getString(cursor.getColumnIndex(MessageContract.MessageEntry.COLUMN_NAME_CONTENT));
+        String direction = cursor.getString(cursor.getColumnIndex(MessageContract.MessageEntry.COLUMN_NAME_DIRECTION));
 
         TextView txtTitle = (TextView) view.findViewById(R.id.Item_name);
-        txtTitle.setText(name);
+        txtTitle.setText(name + " - "+ direction);
 
         TextView textMessage = (TextView) view.findViewById(R.id.Item_subject);
         textMessage.setText(message);

@@ -40,6 +40,7 @@ import edu.utn.listenchat.model.Substep;
 import edu.utn.listenchat.service.DummyLoader;
 import edu.utn.listenchat.service.PersistenceService;
 import edu.utn.listenchat.service.TextToSpeechService;
+import edu.utn.listenchat.utils.StringUtils;
 
 import static android.Manifest.permission.RECORD_AUDIO;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -59,6 +60,7 @@ import static edu.utn.listenchat.utils.CursorUtils.convertCursorToMap;
 import static edu.utn.listenchat.utils.DateUtils.toPrettyString;
 import static edu.utn.listenchat.utils.DateUtils.toStringUntilDay;
 import static org.apache.commons.lang3.StringUtils.replace;
+import static org.apache.commons.lang3.StringUtils.split;
 
 public class MainActivity extends ListeningActivity {
 
@@ -358,9 +360,6 @@ public class MainActivity extends ListeningActivity {
                     case LEER_MENSAJES_NUEVOS:
                         handleNewMessages(this);
                         break;
-                    case ENVIAR_MENSAJE:
-                        this.handlePrepareSendMessage();
-                        break;
                     case CANCELAR:
                         break;
                     case COMANDOS:
@@ -394,16 +393,19 @@ public class MainActivity extends ListeningActivity {
         restartListeningService();
     }
 
-    private void handlePrepareSendMessage() {
+    private void handlePrepareSendMessage(String contact) {
         sendingMessage = true;
+        currentContact = contact;
         textToSpeechService.speak("Diga", buildStartCallback(), this);
     }
 
-    private void handlePerformSendMessage(String message) {
-        if ("cancelar".equalsIgnoreCase(message)) {
+    private void handlePerformSendMessage(String text) {
+        if ("cancelar".equalsIgnoreCase(text)) {
             textToSpeechService.speak("Envío cancelado", buildStartCallback(), this);
         } else {
-            this.send(message, 0);
+            this.send(text, 0);
+            Message message = Message.create(this.currentContact, text, new Date(), "O");
+            persistenceService.insert(this.getApplicationContext(), message);
         }
         sendingMessage = false;
     }
@@ -412,6 +414,9 @@ public class MainActivity extends ListeningActivity {
         if (command.contains("conversación con")) {
             String contact = replace(command, "conversación con ", "");
             this.handleConversation(contact);
+        } else if (command.contains("enviar mensaje a")) {
+            String contact = replace(command, "enviar mensaje a ", "");
+            this.handlePrepareSendMessage(contact);
         } else {
             textToSpeechService.speak("Comando desconocido", buildStartCallback(), this);
         }
@@ -470,6 +475,16 @@ public class MainActivity extends ListeningActivity {
         }
     }
 
+    private String prettyContact(Message message) {
+        String direcction = message.getDirection();
+        if ("O".equals(direcction)) {
+            return "YO";
+        } else if ("I".equals(direcction)) {
+            return newArrayList(split(message.getName(), " ")).get(0);
+        }
+        return "";
+    }
+
     private void handleFollowing(Context context) {
         Multimap<String, Message> messagesByDate = this.massagesByDate(currentContact);
 
@@ -479,7 +494,9 @@ public class MainActivity extends ListeningActivity {
                 List<Message> dateMessages = newArrayList(messagesByDate.get(currentDate));
                 if (currentMessage + 1 < dateMessages.size()) {
                     currentMessage += 1;
-                    stringBuilder.append(dateMessages.get(currentMessage).getMessage()).append(". ");
+                    Message message = dateMessages.get(currentMessage);
+                    stringBuilder.append(this.prettyContact(message) + ". ").append(". ");
+                    stringBuilder.append(message.getMessage()).append(". ");
                 } else {
                     stringBuilder.append("No hay más mensajes siguientes del " + toPrettyString(currentDate));
                 }
@@ -502,7 +519,9 @@ public class MainActivity extends ListeningActivity {
                 List<Message> dateMessages = newArrayList(messagesByDate.get(currentDate));
                 if (currentMessage - 1 >= 0) {
                     currentMessage -= 1;
-                    stringBuilder.append(dateMessages.get(currentMessage).getMessage()).append(". ");
+                    Message message = dateMessages.get(currentMessage);
+                    stringBuilder.append(this.prettyContact(message) + ". ").append(". ");
+                    stringBuilder.append(message.getMessage()).append(". ");
                 } else {
                     stringBuilder.append("No hay más mensajes anteriores del " + toPrettyString(currentDate));
                 }
@@ -615,8 +634,7 @@ public class MainActivity extends ListeningActivity {
 
             if (isMessengerNotification(intent)) {
                 try {
-                    send("Hola", 0);
-                    Message message = Message.create(contact, text, new Date());
+                    Message message = Message.create(contact, text, new Date(), "I");
 
                     Log.i("CONTROL", "New Intent id: " + message.getIntentId());
 

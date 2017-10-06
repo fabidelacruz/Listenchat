@@ -34,6 +34,7 @@ public class MessageDao {
                 message.setMessage(cursor.getString(3));
                 message.setLeido(cursor.getString(4));
                 message.setReceivedDate(toDate(cursor.getString(5)));
+                message.setDirection(cursor.getString(6));
 
                 messages.add(message);
             } while(cursor.moveToNext());

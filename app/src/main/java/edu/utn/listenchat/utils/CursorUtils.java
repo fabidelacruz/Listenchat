@@ -18,9 +18,11 @@ public class CursorUtils {
         Multimap<String, String> map = ArrayListMultimap.create();
         if (cursor.moveToFirst()) {
             do {
-                String contact = cursor.getString(2);
-                String message = cursor.getString(3);
-                map.put(contact, message);
+                if ("I".equals(cursor.getString(6))) {
+                    String contact = cursor.getString(2);
+                    String message = cursor.getString(3);
+                    map.put(contact, message);
+                }
             } while(cursor.moveToNext());
         }
         return map;

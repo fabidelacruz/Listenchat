@@ -15,7 +15,8 @@ public class StringUtils {
     }
 
     public static String normalized(String s) {
-        return Normalizer.normalize(trimToEmpty(s), Normalizer.Form.NFD).toLowerCase();
+        String lower =  Normalizer.normalize(trimToEmpty(s), Normalizer.Form.NFD).toLowerCase();
+        return org.apache.commons.lang3.StringUtils.stripAccents(lower);
     }
 
 }
