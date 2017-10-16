@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
+import edu.utn.listenchat.activity.MainActivity;
 import edu.utn.listenchat.listener.TextToSpeechCallaback;
 
 import static android.content.ContentValues.TAG;
@@ -22,11 +23,11 @@ public class TextToSpeechService {
     private boolean started = false;
     private List<Object[]> queue = new ArrayList<>();
 
-    synchronized public void speak(final String message, final TextToSpeechCallaback conversionCallback, Activity appContext) {
+    synchronized public void speak(final String message, MainActivity activity, final TextToSpeechCallaback conversionCallback) {
         if (textToSpeech != null) {
             speak(message, conversionCallback);
         } else {
-            textToSpeech = new TextToSpeech(appContext, new TextToSpeech.OnInitListener() {
+            textToSpeech = new TextToSpeech(activity, new TextToSpeech.OnInitListener() {
                 @Override
                 public void onInit(int status) {
                     if (status != TextToSpeech.ERROR) {
@@ -111,4 +112,6 @@ public class TextToSpeechService {
         textToSpeech.stop();
         queue.clear();
     }
+
+
 }

@@ -2,12 +2,10 @@ package edu.utn.listenchat.activity;
 
 import android.Manifest;
 import android.content.BroadcastReceiver;
-import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
@@ -31,7 +29,11 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import edu.utn.listenchat.R;
+import edu.utn.listenchat.connector.MessengerConnector;
 import edu.utn.listenchat.db.MessageDao;
+import edu.utn.listenchat.handler.ConversationHandler;
+import edu.utn.listenchat.handler.NewsHandler;
+import edu.utn.listenchat.handler.SendingHandler;
 import edu.utn.listenchat.listener.TextToSpeechCallaback;
 import edu.utn.listenchat.model.MenuStep;
 import edu.utn.listenchat.model.Step;
@@ -40,7 +42,6 @@ import edu.utn.listenchat.model.Substep;
 import edu.utn.listenchat.service.DummyLoader;
 import edu.utn.listenchat.service.PersistenceService;
 import edu.utn.listenchat.service.TextToSpeechService;
-import edu.utn.listenchat.utils.StringUtils;
 
 import static android.Manifest.permission.RECORD_AUDIO;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -59,6 +60,7 @@ import static edu.utn.listenchat.model.Substep.SELECT_CONTACT;
 import static edu.utn.listenchat.utils.CursorUtils.convertCursorToMap;
 import static edu.utn.listenchat.utils.DateUtils.toPrettyString;
 import static edu.utn.listenchat.utils.DateUtils.toStringUntilDay;
+import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.replace;
 import static org.apache.commons.lang3.StringUtils.split;
 
@@ -86,15 +88,16 @@ public class MainActivity extends ListeningActivity {
     private PersistenceService persistenceService = new PersistenceService();
     private MessageDao messageDao = new MessageDao();
     private DummyLoader dummyLoader = new DummyLoader();
+    private MessengerConnector messengerConnector = new MessengerConnector();
+
+    private SendingHandler sendingHandler;
+    private NewsHandler newsHandler;
+    private ConversationHandler conversationHandler;
 
     ListView list;
     CustomListAdapter adapter;
 
-    private int currentMessage;
-    private boolean enabledConversation;
     private boolean sendingMessage = false;
-    private String currentDate;
-    private String currentContact = "Cacho Garay";
 
     private MenuStep step;
 
@@ -102,6 +105,19 @@ public class MainActivity extends ListeningActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        this.newsHandler = new NewsHandler();
+        this.newsHandler.setPersistenceService(this.persistenceService);
+        this.newsHandler.setTextToSpeechService(this.textToSpeechService);
+
+        this.conversationHandler = new ConversationHandler();
+        this.conversationHandler.setTextToSpeechService(this.textToSpeechService);
+        this.conversationHandler.setMessageDao(this.messageDao);
+
+        this.sendingHandler = new SendingHandler();
+        this.sendingHandler.setTextToSpeechService(this.textToSpeechService);
+        this.sendingHandler.setPersistenceService(this.persistenceService);
+        this.sendingHandler.setMessengerConnector(this.messengerConnector);
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -117,26 +133,9 @@ public class MainActivity extends ListeningActivity {
 
         LocalBroadcastManager.getInstance(this).registerReceiver(onNotice, new IntentFilter("Listenchat-msg"));
 
-        textToSpeechService.speak(getString(R.string.welcome_message), buildStartCallback(), this);
+        textToSpeechService.speak(getString(R.string.welcome_message), this, this.buildStartCallback());
     }
 
-    private void send(String message, int id) {
-        //Uri uri = Uri.parse("fb-messenger://user/");
-        //uri = ContentUris.withAppendedId(uri,id);
-        //Intent intent = new Intent(Intent.ACTION_SEND, uri);
-
-        Intent sendIntent = new Intent();
-        sendIntent.setAction(Intent.ACTION_SEND);
-        sendIntent.putExtra(Intent.EXTRA_TEXT, message);
-        sendIntent.setType("text/plain");
-        sendIntent.setPackage("com.facebook.orca");
-
-        try {
-            startActivity(sendIntent);
-        } catch (android.content.ActivityNotFoundException ex) {
-            Toast.makeText(this, "Please Install Facebook Messenger",LENGTH_LONG).show();
-        }
-    }
 
     private void checkPermissions() {
         if (!checkNotificationEnabled()) {
@@ -225,7 +224,7 @@ public class MainActivity extends ListeningActivity {
         if (Step.MAIN.equals(this.step.getStep())) {
             Substep previous = Substep.previous(this.step.getSubstep());
             this.step.setSubstep(previous);
-            this.textToSpeechService.speak(previous.getDescription(), buildStartCallback(),this);
+            this.textToSpeechService.speak(previous.getDescription(),this, this.buildStartCallback());
             return true;
         }
 
@@ -233,7 +232,7 @@ public class MainActivity extends ListeningActivity {
             if (SELECT_CONTACT.equals(this.step.getSubstep())) {
                 previousContact();
             } else {
-                handlePrevious(this);
+                this.conversationHandler.previous(this);
             }
 
             return true;
@@ -253,9 +252,9 @@ public class MainActivity extends ListeningActivity {
                 this.step.setContact(idx >= 0 ? contacts.get(idx) : contacts.get(contacts.size() - 1));
             }
 
-            textToSpeechService.speak(this.step.getContact(), buildStartCallback(), this);
+            textToSpeechService.speak(this.step.getContact(), this, this.buildStartCallback());
         } else {
-            textToSpeechService.speak("No hay contactos", buildStartCallback(), this);
+            textToSpeechService.speak("No hay contactos", this, this.buildStartCallback());
             this.step = null;
         }
 
@@ -271,7 +270,7 @@ public class MainActivity extends ListeningActivity {
         if (Step.MAIN.equals(this.step.getStep())) {
             Substep next = Substep.next(this.step.getSubstep());
             this.step.setSubstep(next);
-            this.textToSpeechService.speak(next.getDescription(), buildStartCallback(),this);
+            this.textToSpeechService.speak(next.getDescription(),this, this.buildStartCallback());
             return true;
         }
 
@@ -279,7 +278,7 @@ public class MainActivity extends ListeningActivity {
             if (SELECT_CONTACT.equals(this.step.getSubstep())) {
                 nextContact();
             } else {
-                handleFollowing(this);
+                this.conversationHandler.following(this);
             }
 
             return true;
@@ -299,9 +298,9 @@ public class MainActivity extends ListeningActivity {
                 this.step.setContact(idx < contacts.size() ? contacts.get(idx) : contacts.get(0));
             }
 
-            textToSpeechService.speak(this.step.getContact(), buildStartCallback(), this);
+            textToSpeechService.speak(this.step.getContact(), this, this.buildStartCallback());
         } else {
-            textToSpeechService.speak("No hay contactos", buildStartCallback(), this);
+            textToSpeechService.speak("No hay contactos", this, this.buildStartCallback());
             this.step = null;
         }
     }
@@ -313,31 +312,31 @@ public class MainActivity extends ListeningActivity {
             step = new MenuStep();
             step.setStep(Step.MAIN);
             step.setSubstep(Substep.MESSAGES);
-            textToSpeechService.speak("Menú principal", buildStartCallback(), this);
-            textToSpeechService.speak(step.getSubstep().getDescription(), buildStartCallback(), this);
+            textToSpeechService.speak("Menú principal", this, this.buildStartCallback());
+            textToSpeechService.speak(step.getSubstep().getDescription(), this, this.buildStartCallback());
         } else {
             if (Step.MAIN.equals(step.getStep())) {
                 switch (this.step.getSubstep()) {
                     case NOVELTIES:
-                        this.handleNovelties(this);
+                        this.newsHandler.tellTheNovelties(this);
                         this.step = null;
                         break;
 
                     case MESSAGES:
-                        this.handleNewMessages(this);
+                        this.newsHandler.tellTheNewMessages(this);
                         this.step = null;
                         break;
 
                     case CONVERSATION:
                         this.step.setSubstep(SELECT_CONTACT);
                         this.step.setStep(CONVERSATION);
-                        this.textToSpeechService.speak(SELECT_CONTACT.getDescription(), buildStartCallback(), this);
+                        this.textToSpeechService.speak(SELECT_CONTACT.getDescription(), this, this.buildStartCallback());
                         break;
                 }
             }else if (CONVERSATION.equals(step.getStep()) && SELECT_CONTACT.equals(step.getSubstep())
                     && step.getContact() != null) {
                 this.step.setSubstep(Substep.READ);
-                this.handleConversation(step.getContact());
+                this.conversationHandler.prepareConversation(this, step.getContact());
             }
 
         }
@@ -351,14 +350,14 @@ public class MainActivity extends ListeningActivity {
 
         if (!filtered.isEmpty()) {
             if (this.sendingMessage) {
-                this.handlePerformSendMessage(filtered.get(0).toLowerCase());
+                this.sendingHandler.sendMessage(this, filtered.get(0).toLowerCase());
             } else {
                 switch (filtered.get(0).toLowerCase()) {
                     case NOVEDADES:
-                        handleNovelties(this);
+                        this.newsHandler.tellTheNovelties(this);
                         break;
                     case LEER_MENSAJES_NUEVOS:
-                        handleNewMessages(this);
+                        this.newsHandler.tellTheNewMessages(this);
                         break;
                     case CANCELAR:
                         break;
@@ -371,16 +370,16 @@ public class MainActivity extends ListeningActivity {
                     case ENTRAR:
                         break;
                     case SIGUIENTE:
-                        handleFollowing(this);
+                        this.conversationHandler.following(this);
                         break;
                     case ANTERIOR:
-                        this.handlePrevious(this);
+                        this.conversationHandler.previous(this);
                         break;
                     case DIA_SIGUIENTE:
-                        handleFollowingDay(this);
+                        this.conversationHandler.followingDay(this);
                         break;
                     case DIA_ANTERIOR:
-                        this.handlePreviousDay(this);
+                        this.conversationHandler.previousDay(this);
                         break;
                     default:
                         this.handleDefault(filtered.get(0).toLowerCase());
@@ -393,199 +392,16 @@ public class MainActivity extends ListeningActivity {
         restartListeningService();
     }
 
-    private void handlePrepareSendMessage(String contact) {
-        sendingMessage = true;
-        currentContact = contact;
-        textToSpeechService.speak("Diga", buildStartCallback(), this);
-    }
-
-    private void handlePerformSendMessage(String text) {
-        if ("cancelar".equalsIgnoreCase(text)) {
-            textToSpeechService.speak("Envío cancelado", buildStartCallback(), this);
-        } else {
-            this.send(text, 0);
-            Message message = Message.create(this.currentContact, text, new Date(), "O");
-            persistenceService.insert(this.getApplicationContext(), message);
-        }
-        sendingMessage = false;
-    }
 
     private void handleDefault(String command) {
         if (command.contains("conversación con")) {
             String contact = replace(command, "conversación con ", "");
-            this.handleConversation(contact);
+            this.conversationHandler.prepareConversation(this, contact);
         } else if (command.contains("enviar mensaje a")) {
             String contact = replace(command, "enviar mensaje a ", "");
-            this.handlePrepareSendMessage(contact);
+            this.sendingHandler.prepareMessage(this, contact);
         } else {
-            textToSpeechService.speak("Comando desconocido", buildStartCallback(), this);
-        }
-    }
-
-    private void handleNewMessages(Context context) {
-        Cursor cursor = persistenceService.getNewsCursor(getApplicationContext());
-
-        Multimap<String, String> allMessages = convertCursorToMap(cursor);
-
-        if (allMessages.keySet().size() > 0) {
-            for (String user : allMessages.keySet()) {
-                StringBuilder stringBuilder = new StringBuilder();
-                Collection<String> userMessages = allMessages.get(user);
-                stringBuilder.append("Mensajes recibidos de ").append(user).append(". ");
-                for (String message : userMessages) {
-                    stringBuilder.append(message).append(". ");
-                }
-                Log.i("MENSAJES", stringBuilder.toString());
-                textToSpeechService.speak(stringBuilder.toString(), buildStartCallback(), this);
-            }
-        } else {
-            textToSpeechService.speak("Usted no ha recibido ningún mensaje nuevo", buildStartCallback(), this);
-        }
-    }
-
-    private TextToSpeechCallaback buildReadCallback(final List<Integer> integers, final Context context) {
-        return new TextToSpeechCallaback() {
-            @Override
-            public void onCompletion() {
-                //persistenceService.markNotified(integers, context);
-            }
-
-            @Override
-            public void onErrorOccured(int errorCode) {
-                //Do nothing
-            }
-        };
-    }
-
-    private void handleNovelties(Context context) {
-        Cursor cursor = persistenceService.getNewsCursor(getApplicationContext());
-
-        Multimap<String, String> allMessages = convertCursorToMap(cursor);
-
-        if (allMessages.keySet().size() > 0) {
-            for (String user : allMessages.keySet()) {
-                StringBuilder stringBuilder = new StringBuilder();
-                Collection<String> userMessages = allMessages.get(user);
-                stringBuilder.append(userMessages.size()).append(" mensajes recibidos de ").append(user).append(". ");
-                Log.i("MENSAJES", stringBuilder.toString());
-                textToSpeechService.speak(stringBuilder.toString(), buildStartCallback(), this);
-            }
-        } else {
-            textToSpeechService.speak("Usted no ha recibido ningún mensaje nuevo", buildStartCallback(), this);
-        }
-    }
-
-    private String prettyContact(Message message) {
-        String direcction = message.getDirection();
-        if ("O".equals(direcction)) {
-            return "YO";
-        } else if ("I".equals(direcction)) {
-            return newArrayList(split(message.getName(), " ")).get(0);
-        }
-        return "";
-    }
-
-    private void handleFollowing(Context context) {
-        Multimap<String, Message> messagesByDate = this.massagesByDate(currentContact);
-
-        if (this.enabledConversation) {
-            if (messagesByDate.size() > 0) {
-                StringBuilder stringBuilder = new StringBuilder();
-                List<Message> dateMessages = newArrayList(messagesByDate.get(currentDate));
-                if (currentMessage + 1 < dateMessages.size()) {
-                    currentMessage += 1;
-                    Message message = dateMessages.get(currentMessage);
-                    stringBuilder.append(this.prettyContact(message) + ". ").append(". ");
-                    stringBuilder.append(message.getMessage()).append(". ");
-                } else {
-                    stringBuilder.append("No hay más mensajes siguientes del " + toPrettyString(currentDate));
-                }
-                Log.i("MENSAJES", stringBuilder.toString());
-                textToSpeechService.speak(stringBuilder.toString(), buildStartCallback(), this);
-            } else {
-                textToSpeechService.speak("Situación no esperada", buildStartCallback(), this);
-            }
-        } else {
-            textToSpeechService.speak("El comando siguiente sólo puede usarse en modo conversación", buildStartCallback(), this);
-        }
-    }
-
-    private void handlePrevious(Context context) {
-        Multimap<String, Message> messagesByDate = this.massagesByDate(currentContact);
-
-        if (this.enabledConversation) {
-            if (messagesByDate.size() > 0) {
-                StringBuilder stringBuilder = new StringBuilder();
-                List<Message> dateMessages = newArrayList(messagesByDate.get(currentDate));
-                if (currentMessage - 1 >= 0) {
-                    currentMessage -= 1;
-                    Message message = dateMessages.get(currentMessage);
-                    stringBuilder.append(this.prettyContact(message) + ". ").append(". ");
-                    stringBuilder.append(message.getMessage()).append(". ");
-                } else {
-                    stringBuilder.append("No hay más mensajes anteriores del " + toPrettyString(currentDate));
-                }
-                Log.i("MENSAJES", stringBuilder.toString());
-                textToSpeechService.speak(stringBuilder.toString(), buildStartCallback(), this);
-            } else {
-                textToSpeechService.speak("Situación no esperada", buildStartCallback(), this);
-            }
-        } else {
-            textToSpeechService.speak("El comando anterior sólo puede usarse en modo conversación", buildStartCallback(), this);
-        }
-    }
-
-
-    private void handleConversation(String contact) {
-        Multimap<String, Message> messages = this.massagesByDate(contact);
-        List<String> dates = Lists.newArrayList(messages.keySet());
-
-        if (dates.size() > 0) {
-            currentContact = contact;
-            currentMessage = -1;
-            enabledConversation = true;
-            String lastDate = dates.get(dates.size()-1);
-            currentDate = lastDate;
-            textToSpeechService.speak("Conversación con " + currentContact, buildStartCallback(), this);
-            textToSpeechService.speak(toPrettyString(lastDate), buildStartCallback(), this);
-        } else {
-            textToSpeechService.speak("Usted no ha recibido ningún mensaje de " + contact, buildStartCallback(), this);
-            enabledConversation = false;
-        }
-
-    }
-
-    private void handleFollowingDay(Context context) {
-        if (this.enabledConversation) {
-            Multimap<String, Message> messagesByDate = this.massagesByDate(currentContact);
-            List<String> dates = Lists.newArrayList(messagesByDate.keySet());
-            int datePosition = dates.indexOf(currentDate);
-            if (datePosition + 1 < dates.size()) {
-                currentDate = dates.get(datePosition + 1);
-                currentMessage = -1;
-                textToSpeechService.speak(toPrettyString(currentDate), buildStartCallback(), this);
-            } else {
-                textToSpeechService.speak("Ya no hay más días de conversación con "+ currentContact, buildStartCallback(), this);
-            }
-        } else {
-            textToSpeechService.speak("El comando dia siguiente sólo puede usarse en modo conversación", buildStartCallback(), this);
-        }
-    }
-
-    private void handlePreviousDay(Context context) {
-        if (this.enabledConversation) {
-            Multimap<String, Message> messagesByDate = this.massagesByDate(currentContact);
-            List<String> dates = Lists.newArrayList(messagesByDate.keySet());
-            int datePosition = dates.indexOf(currentDate);
-            if (datePosition > 0) {
-                currentDate = dates.get(datePosition - 1);
-                currentMessage = -1;
-                textToSpeechService.speak(toPrettyString(currentDate), buildStartCallback(), this);
-            } else {
-                textToSpeechService.speak("Ya no hay días de conversación anteriores con "+ currentContact, buildStartCallback(), this);
-            }
-        } else {
-            textToSpeechService.speak("El comando dia anterior sólo puede usarse en modo conversación", buildStartCallback(), this);
+            textToSpeechService.speak("Comando desconocido", this, this.buildStartCallback());
         }
     }
 
@@ -610,7 +426,52 @@ public class MainActivity extends ListeningActivity {
         }));
     }
 
-    private TextToSpeechCallaback buildStartCallback() {
+    private BroadcastReceiver onNotice= new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String source = intent.getStringExtra("package");
+            String contact = intent.getStringExtra("title");
+            String text = intent.getStringExtra("text");
+
+            if (!isMessengerNotification(intent)) {
+                Log.i("CONTROL", format("%s is not a Messenger notification", source));
+                return;
+            }
+
+            Message message = Message.create(contact, text, new Date(), "I");
+
+            if (isDuplicated(message)) {
+                Log.i("CONTROL", format("Duplicated intentId %s", message.getIntentId()));
+                return;
+            }
+
+            persistenceService.insert(context, message);
+            if (list != null) {
+                reloadAdapter();
+            }
+            Log.i("CONTROL", "Saved Intent id: " + message.getIntentId());
+        }
+    };
+
+
+    private boolean isMessengerNotification(Intent intent) {
+        return "com.facebook.orca".equals(intent.getStringExtra("package"));
+    }
+
+    private boolean isDuplicated(Message message) {
+        Cursor cursor = persistenceService.getAllCursor(getApplicationContext());
+        if (cursor.moveToFirst()) {
+            do {
+                if (message.getIntentId().equals(cursor.getString(1))) {
+                    return true;
+                }
+            } while (cursor.moveToNext());
+        }
+        return false;
+    }
+
+    public TextToSpeechCallaback buildStartCallback() {
         return new TextToSpeechCallaback() {
 
             @Override
@@ -625,60 +486,5 @@ public class MainActivity extends ListeningActivity {
         };
     }
 
-    private BroadcastReceiver onNotice= new BroadcastReceiver() {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String contact = intent.getStringExtra("title");
-            String text = intent.getStringExtra("text");
-
-            if (isMessengerNotification(intent)) {
-                try {
-                    Message message = Message.create(contact, text, new Date(), "I");
-
-                    Log.i("CONTROL", "New Intent id: " + message.getIntentId());
-
-                    if (!isDuplicated(message.getIntentId())) {
-                        persistenceService.insert(context, message);
-                        if (list != null) {
-                            reloadAdapter();
-                        }
-                        Log.i("CONTROL", "Saved Intent id: " + message.getIntentId());
-                    } else {
-                        Log.i("CONTROL", "Duplicated Intent id: " + message.getIntentId());
-                    }
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    };
-
-    private static boolean isMessengerNotification(Intent intent) {
-        return "com.facebook.orca".equals(intent.getStringExtra("package"));
-    }
-
-    private Multimap<String, Message> massagesByDate(String contact) {
-        Multimap<String, Message> messagesByDate = MultimapBuilder.treeKeys().linkedListValues().build();
-
-        List<Message> messages = this.messageDao.allFromContact(this.getApplicationContext(), contact);
-        for (Message message : messages) {
-            messagesByDate.put(toStringUntilDay(message.getReceivedDate()), message);
-        }
-        return messagesByDate;
-    }
-
-    private boolean isDuplicated(String intentId) {
-        Cursor cursor = persistenceService.getAllCursor(getApplicationContext());
-        if (cursor.moveToFirst()) {
-            do {
-                if (intentId.equals(cursor.getString(1))) {
-                    return true;
-                }
-            } while (cursor.moveToNext());
-        }
-        return false;
-    }
 
 }
