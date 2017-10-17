@@ -1,4 +1,4 @@
-package edu.utn.listenchat.handler;
+package edu.utn.listenchat.handler.common;
 
 
 import android.util.Log;
@@ -26,8 +26,8 @@ public class ConversationHandler {
     private MessageDao messageDao;
 
 
-    public void prepareConversation(MainActivity activity, String contact) {
-        Multimap<String, Message> messages = this.messageDao.massagesByDate(activity, contact);
+    public void prepareConversation(String contact) {
+        Multimap<String, Message> messages = this.messageDao.massagesByDate(contact);
         List<String> dates = Lists.newArrayList(messages.keySet());
 
         if (dates.size() > 0) {
@@ -36,18 +36,18 @@ public class ConversationHandler {
             getState().setConversationMode(TRUE);
             String lastDate = dates.get(dates.size()-1);
             getState().setCurrentMessageDate(lastDate);
-            textToSpeechService.speak("Conversación con " + contact, activity, activity.buildStartCallback());
-            textToSpeechService.speak(toPrettyString(lastDate), activity, activity.buildStartCallback());
+            textToSpeechService.speak("Conversación con " + contact);
+            textToSpeechService.speak(toPrettyString(lastDate));
         } else {
-            textToSpeechService.speak("Usted no ha recibido ningún mensaje de " + contact, activity, activity.buildStartCallback());
+            textToSpeechService.speak("Usted no ha recibido ningún mensaje de " + contact);
             getState().setConversationMode(TRUE);
         }
 
     }
 
 
-    public void following(MainActivity activity) {
-        Multimap<String, Message> messagesByDate = this.messageDao.massagesByDate(activity, getState().getCurrentContact());
+    public void following() {
+        Multimap<String, Message> messagesByDate = this.messageDao.massagesByDate(getState().getCurrentContact());
 
         if (getState().isConversationMode()) {
             if (messagesByDate.size() > 0) {
@@ -64,18 +64,18 @@ public class ConversationHandler {
                     stringBuilder.append("No hay más mensajes siguientes del " + toPrettyString(getState().getCurrentMessageDate()));
                 }
                 Log.i("MENSAJES", stringBuilder.toString());
-                textToSpeechService.speak(stringBuilder.toString(), activity, activity.buildStartCallback());
+                textToSpeechService.speak(stringBuilder.toString());
             } else {
-                textToSpeechService.speak("Situación no esperada", activity, activity.buildStartCallback());
+                textToSpeechService.speak("Situación no esperada");
             }
         } else {
-            textToSpeechService.speak("El comando siguiente sólo puede usarse en modo conversación", activity, activity.buildStartCallback());
+            textToSpeechService.speak("El comando siguiente sólo puede usarse en modo conversación");
         }
     }
 
 
-    public void previous(MainActivity activity) {
-        Multimap<String, Message> messagesByDate = this.messageDao.massagesByDate(activity, getState().getCurrentContact());
+    public void previous() {
+        Multimap<String, Message> messagesByDate = this.messageDao.massagesByDate(getState().getCurrentContact());
 
         if (getState().isConversationMode()) {
             if (messagesByDate.size() > 0) {
@@ -92,46 +92,46 @@ public class ConversationHandler {
                     stringBuilder.append("No hay más mensajes anteriores del " + toPrettyString(getState().getCurrentMessageDate()));
                 }
                 Log.i("MENSAJES", stringBuilder.toString());
-                textToSpeechService.speak(stringBuilder.toString(), activity, activity.buildStartCallback());
+                textToSpeechService.speak(stringBuilder.toString());
             } else {
-                textToSpeechService.speak("Situación no esperada", activity, activity.buildStartCallback());
+                textToSpeechService.speak("Situación no esperada");
             }
         } else {
-            textToSpeechService.speak("El comando anterior sólo puede usarse en modo conversación", activity, activity.buildStartCallback());
+            textToSpeechService.speak("El comando anterior sólo puede usarse en modo conversación");
         }
     }
 
-    public void followingDay(MainActivity activity) {
+    public void followingDay() {
         if (getState().isConversationMode()) {
-            Multimap<String, Message> messagesByDate = this.messageDao.massagesByDate(activity, getState().getCurrentContact());
+            Multimap<String, Message> messagesByDate = this.messageDao.massagesByDate(getState().getCurrentContact());
             List<String> dates = Lists.newArrayList(messagesByDate.keySet());
             int datePosition = dates.indexOf(getState().getCurrentMessageDate());
             if (datePosition + 1 < dates.size()) {
                 getState().setCurrentMessageDate(dates.get(datePosition + 1));
                 getState().setCurrentMessagePosition(-1);
-                textToSpeechService.speak(toPrettyString(getState().getCurrentMessageDate()), activity, activity.buildStartCallback());
+                textToSpeechService.speak(toPrettyString(getState().getCurrentMessageDate()));
             } else {
-                textToSpeechService.speak("Ya no hay más días de conversación con "+ getState().getCurrentContact(), activity, activity.buildStartCallback());
+                textToSpeechService.speak("Ya no hay más días de conversación con "+ getState().getCurrentContact());
             }
         } else {
-            textToSpeechService.speak("El comando dia siguiente sólo puede usarse en modo conversación", activity, activity.buildStartCallback());
+            textToSpeechService.speak("El comando dia siguiente sólo puede usarse en modo conversación");
         }
     }
 
-    public void previousDay(MainActivity activity) {
+    public void previousDay() {
         if (getState().isConversationMode()) {
-            Multimap<String, Message> messagesByDate = this.messageDao.massagesByDate(activity, getState().getCurrentContact());
+            Multimap<String, Message> messagesByDate = this.messageDao.massagesByDate(getState().getCurrentContact());
             List<String> dates = Lists.newArrayList(messagesByDate.keySet());
             int datePosition = dates.indexOf(getState().getCurrentMessageDate());
             if (datePosition > 0) {
                 getState().setCurrentMessageDate(dates.get(datePosition - 1));
                 getState().setCurrentMessagePosition(-1);
-                textToSpeechService.speak(toPrettyString(getState().getCurrentMessageDate()), activity, activity.buildStartCallback());
+                textToSpeechService.speak(toPrettyString(getState().getCurrentMessageDate()));
             } else {
-                textToSpeechService.speak("Ya no hay días de conversación anteriores con "+ getState().getCurrentContact(), activity, activity.buildStartCallback());
+                textToSpeechService.speak("Ya no hay días de conversación anteriores con "+ getState().getCurrentContact());
             }
         } else {
-            textToSpeechService.speak("El comando dia anterior sólo puede usarse en modo conversación", activity, activity.buildStartCallback());
+            textToSpeechService.speak("El comando dia anterior sólo puede usarse en modo conversación");
         }
     }
 

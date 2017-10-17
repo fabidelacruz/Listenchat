@@ -10,15 +10,12 @@ import edu.utn.listenchat.model.Message;
 
 import static edu.utn.listenchat.utils.DateUtils.toDate;
 
-/**
- * Created by fabian on 9/11/17.
- */
 
 public class DummyLoader {
 
     private PersistenceService persistenceService = new PersistenceService();
 
-    public void load(Context context) {
+    public void load() {
 
 
         List<Message> messages = Lists.newArrayList();
@@ -43,7 +40,12 @@ public class DummyLoader {
         messages.add(Message.create("Sergio Gonal", "Hola soy sergio 22", toDate("2017-09-09T00:11:22"), "I"));
         messages.add(Message.create("Sergio Gonal", "Hola soy sergio 33", toDate("2017-09-09T00:11:22"), "I"));
 
-        persistenceService.insert(context, messages);
+        persistenceService.insert(messages);
+    }
+
+
+    public void setPersistenceService(PersistenceService persistenceService) {
+        this.persistenceService = persistenceService;
     }
 
 }

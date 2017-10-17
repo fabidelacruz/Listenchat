@@ -1,4 +1,4 @@
-package edu.utn.listenchat.handler;
+package edu.utn.listenchat.handler.common;
 
 
 import java.util.Date;
@@ -16,26 +16,32 @@ import static java.lang.Boolean.TRUE;
 
 public class SendingHandler {
 
+    private MainActivity mainActivity;
     private TextToSpeechService textToSpeechService;
     private MessengerConnector messengerConnector;
     private PersistenceService persistenceService;
 
 
-    public void prepareMessage(MainActivity activity, String contact) {
+    public void prepareMessage(String contact) {
         getState().setSendingMessageMode(TRUE);
         getState().setCurrentContact(contact);
-        textToSpeechService.speak("Diga", activity, activity.buildStartCallback());
+        textToSpeechService.speak("Diga");
     }
 
-    public void sendMessage(MainActivity activity, String text) {
+    public void sendMessage(String text) {
         if ("cancelar".equalsIgnoreCase(text)) {
-            textToSpeechService.speak("Envío cancelado", activity, activity.buildStartCallback());
+            textToSpeechService.speak("Envío cancelado");
         } else {
-            this.messengerConnector.send(activity, text, 0);
+            this.messengerConnector.send(text, 0);
             Message message = Message.create(getState().getCurrentContact(), text, new Date(), "O");
-            persistenceService.insert(activity.getApplicationContext(), message);
+            persistenceService.insert(mainActivity, message);
         }
         getState().setSendingMessageMode(FALSE);
+    }
+
+
+    public void setMainActivity(MainActivity mainActivity) {
+        this.mainActivity = mainActivity;
     }
 
     public void setTextToSpeechService(TextToSpeechService textToSpeechService) {
@@ -49,4 +55,5 @@ public class SendingHandler {
     public void setPersistenceService(PersistenceService persistenceService) {
         this.persistenceService = persistenceService;
     }
+
 }

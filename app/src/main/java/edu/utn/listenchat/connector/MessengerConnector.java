@@ -9,7 +9,9 @@ import static android.widget.Toast.LENGTH_LONG;
 
 public class MessengerConnector {
 
-    public void send(MainActivity activity, String message, int id) {
+    private MainActivity mainActivity;
+
+    public void send(String message, int id) {
         //Uri uri = Uri.parse("fb-messenger://user/");
         //uri = ContentUris.withAppendedId(uri,id);
         //Intent intent = new Intent(Intent.ACTION_SEND, uri);
@@ -21,10 +23,14 @@ public class MessengerConnector {
         sendIntent.setPackage("com.facebook.orca");
 
         try {
-            activity.startActivity(sendIntent);
+            mainActivity.startActivity(sendIntent);
         } catch (android.content.ActivityNotFoundException ex) {
-            Toast.makeText(activity, "Please Install Facebook Messenger",LENGTH_LONG).show();
+            Toast.makeText(mainActivity, "Please Install Facebook Messenger",LENGTH_LONG).show();
         }
+    }
+
+    public void setMainActivity(MainActivity mainActivity) {
+        this.mainActivity = mainActivity;
     }
 
 }

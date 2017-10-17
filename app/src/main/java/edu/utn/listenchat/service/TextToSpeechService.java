@@ -19,15 +19,17 @@ import static android.content.ContentValues.TAG;
 
 public class TextToSpeechService {
 
+    private MainActivity mainActivity;
     private TextToSpeech textToSpeech;
     private boolean started = false;
     private List<Object[]> queue = new ArrayList<>();
 
-    synchronized public void speak(final String message, MainActivity activity, final TextToSpeechCallaback conversionCallback) {
+    synchronized public void speak(final String message) {
+        final TextToSpeechCallaback conversionCallback = this.buildStartCallback();
         if (textToSpeech != null) {
             speak(message, conversionCallback);
         } else {
-            textToSpeech = new TextToSpeech(activity, new TextToSpeech.OnInitListener() {
+            textToSpeech = new TextToSpeech(mainActivity, new TextToSpeech.OnInitListener() {
                 @Override
                 public void onInit(int status) {
                     if (status != TextToSpeech.ERROR) {
@@ -113,5 +115,23 @@ public class TextToSpeechService {
         queue.clear();
     }
 
+    private TextToSpeechCallaback buildStartCallback() {
+        return new TextToSpeechCallaback() {
+
+            @Override
+            public void onCompletion() {
+            }
+
+            @Override
+            public void onErrorOccured(int errorCode) {
+                Log.e("", errorCode + "");
+            }
+
+        };
+    }
+
+    public void setMainActivity(MainActivity mainActivity) {
+        this.mainActivity = mainActivity;
+    }
 
 }

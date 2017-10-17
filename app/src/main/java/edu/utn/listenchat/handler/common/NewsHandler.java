@@ -1,4 +1,4 @@
-package edu.utn.listenchat.handler;
+package edu.utn.listenchat.handler.common;
 
 
 import android.database.Cursor;
@@ -21,8 +21,8 @@ public class NewsHandler {
     private TextToSpeechService textToSpeechService;
 
 
-    public void tellTheNovelties(MainActivity activity) {
-        Cursor cursor = persistenceService.getNewsCursor(activity.getApplicationContext());
+    public void sayNovelties() {
+        Cursor cursor = persistenceService.getNewsCursor();
 
         Multimap<String, String> allMessages = convertCursorToMap(cursor);
 
@@ -32,15 +32,15 @@ public class NewsHandler {
                 Collection<String> userMessages = allMessages.get(user);
                 stringBuilder.append(userMessages.size()).append(" mensajes recibidos de ").append(user).append(". ");
                 Log.i("MENSAJES", stringBuilder.toString());
-                textToSpeechService.speak(stringBuilder.toString(), activity, activity.buildStartCallback());
+                textToSpeechService.speak(stringBuilder.toString());
             }
         } else {
-            textToSpeechService.speak("Usted no ha recibido ningún mensaje nuevo", activity, activity.buildStartCallback());
+            textToSpeechService.speak("Usted no ha recibido ningún mensaje nuevo");
         }
     }
 
-    public void tellTheNewMessages(MainActivity activity) {
-        Cursor cursor = persistenceService.getNewsCursor(activity.getApplicationContext());
+    public void sayNewMessages() {
+        Cursor cursor = persistenceService.getNewsCursor();
 
         Multimap<String, String> allMessages = convertCursorToMap(cursor);
 
@@ -53,10 +53,10 @@ public class NewsHandler {
                     stringBuilder.append(message).append(". ");
                 }
                 Log.i("MENSAJES", stringBuilder.toString());
-                textToSpeechService.speak(stringBuilder.toString(), activity, activity.buildStartCallback());
+                textToSpeechService.speak(stringBuilder.toString());
             }
         } else {
-            textToSpeechService.speak("Usted no ha recibido ningún mensaje nuevo", activity, activity.buildStartCallback());
+            textToSpeechService.speak("Usted no ha recibido ningún mensaje nuevo");
         }
     }
 

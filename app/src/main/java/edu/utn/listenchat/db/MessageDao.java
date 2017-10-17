@@ -17,17 +17,14 @@ import static edu.utn.listenchat.utils.DateUtils.toDate;
 import static edu.utn.listenchat.utils.DateUtils.toStringUntilDay;
 import static edu.utn.listenchat.utils.StringUtils.safeEquals;
 
-/**
- * Created by fabian on 9/10/17.
- */
 
 public class MessageDao {
 
-    private PersistenceService persistenceService = new PersistenceService();
+    private PersistenceService persistenceService;
 
 
-    public List<Message> all(Context context) {
-        Cursor cursor = this.persistenceService.getAllCursor(context);
+    public List<Message> all() {
+        Cursor cursor = this.persistenceService.getAllCursor();
         List<Message> messages = newArrayList();
 
         if (cursor.moveToFirst()) {
@@ -47,10 +44,10 @@ public class MessageDao {
         return messages;
     }
 
-    public List<Message> allFromContact(Context context, String contact) {
+    public List<Message> allFromContact(String contact) {
         List<Message> allFromContact = newArrayList();
 
-        for (Message message : this.all(context)) {
+        for (Message message : this.all()) {
             if (safeEquals(contact, message.getName())) {
                 allFromContact.add(message);
             }
@@ -58,14 +55,18 @@ public class MessageDao {
         return allFromContact;
     }
 
-    public Multimap<String, Message> massagesByDate(MainActivity activity, String contact) {
+    public Multimap<String, Message> massagesByDate(String contact) {
         Multimap<String, Message> messagesByDate = MultimapBuilder.treeKeys().linkedListValues().build();
 
-        List<Message> messages = this.allFromContact(activity.getApplicationContext(), contact);
+        List<Message> messages = this.allFromContact(contact);
         for (Message message : messages) {
             messagesByDate.put(toStringUntilDay(message.getReceivedDate()), message);
         }
         return messagesByDate;
+    }
+
+    public void setPersistenceService(PersistenceService persistenceService) {
+        this.persistenceService = persistenceService;
     }
 
 }

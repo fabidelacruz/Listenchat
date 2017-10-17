@@ -23,11 +23,10 @@ import static edu.utn.listenchat.db.MessageContract.MessageEntry.COLUMN_NAME_LEI
 import static edu.utn.listenchat.db.MessageContract.MessageEntry.TABLE_NAME;
 import static org.apache.commons.lang3.StringUtils.join;
 
-/**
- * Created by fabian on 20/08/17.
- */
 
 public class PersistenceService {
+
+    private MainActivity mainActivity;
 
     public void insert(Context context, Message model) {
         ContentValues values = new ContentValues();
@@ -43,30 +42,30 @@ public class PersistenceService {
         writableDatabase.close();
     }
 
-    public void insert(Context context, List<Message> messages) {
+    public void insert(List<Message> messages) {
         for (Message message : messages) {
-            this.insert(context, message);
+            this.insert(this.mainActivity, message);
         }
     }
 
-    public Cursor getAllCursor(Context context) {
-        return new ListenchatDbHelper(context).getWritableDatabase().rawQuery("SELECT * FROM " + TABLE_NAME, null);
+    public Cursor getAllCursor() {
+        return new ListenchatDbHelper(this.mainActivity).getWritableDatabase().rawQuery("SELECT * FROM " + TABLE_NAME, null);
     }
 
-    public void markNotified(List<Integer> integers, Context context) {
+    public void markNotified(List<Integer> integers) {
         ContentValues cv = new ContentValues();
         cv.put(COLUMN_NAME_LEIDO, "Y");
-        new ListenchatDbHelper(context).getWritableDatabase().update(TABLE_NAME, cv, "_id in (" + join(integers, ",") + ")", null);
+        new ListenchatDbHelper(this.mainActivity).getWritableDatabase().update(TABLE_NAME, cv, "_id in (" + join(integers, ",") + ")", null);
     }
 
-    public Cursor getNewsCursor(Context context) {
-        return new ListenchatDbHelper(context).getWritableDatabase().rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE " + COLUMN_NAME_LEIDO + " = 'N'", null);
+    public Cursor getNewsCursor() {
+        return new ListenchatDbHelper(this.mainActivity).getWritableDatabase().rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE " + COLUMN_NAME_LEIDO + " = 'N'", null);
     }
 
-    public List<String> getContacts(Context context) {
+    public List<String> getContacts() {
         List<String> contacts = Lists.newArrayList();
 
-        Cursor cursor = new ListenchatDbHelper(context).getWritableDatabase().rawQuery("SELECT distinct + " + COLUMN_NAME_CONTACT + " FROM " + TABLE_NAME, null);
+        Cursor cursor = new ListenchatDbHelper(this.mainActivity).getWritableDatabase().rawQuery("SELECT distinct + " + COLUMN_NAME_CONTACT + " FROM " + TABLE_NAME, null);
 
         if (cursor.getCount() > 0) {
             cursor.moveToNext();
@@ -79,5 +78,9 @@ public class PersistenceService {
         cursor.close();
 
         return contacts;
+    }
+
+    public void setMainActivity(MainActivity mainActivity) {
+        this.mainActivity = mainActivity;
     }
 }

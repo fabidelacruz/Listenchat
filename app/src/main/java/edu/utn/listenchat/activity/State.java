@@ -1,6 +1,8 @@
 package edu.utn.listenchat.activity;
 
 
+import edu.utn.listenchat.model.MenuStep;
+
 public class State {
 
     private static State instance = null;
@@ -22,6 +24,10 @@ public class State {
     private String currentContact;
     private int currentMessagePosition;
     private String currentMessageDate;
+
+    /** Buttons */
+    private boolean shortPress;
+    private MenuStep menuStep;
 
 
     public boolean isSendingMessageMode() {
@@ -63,4 +69,21 @@ public class State {
     public void setCurrentMessageDate(String currentMessageDate) {
         this.currentMessageDate = currentMessageDate;
     }
+
+    public boolean isShortPress() {
+        return shortPress;
+    }
+
+    public void setShortPress(boolean shortPress) {
+        this.shortPress = shortPress;
+    }
+
+    public MenuStep getMenuStep() {
+        return menuStep;
+    }
+
+    public void setMenuStep(MenuStep menuStep) {
+        this.menuStep = menuStep;
+    }
+
 }
