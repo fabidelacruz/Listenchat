@@ -4,7 +4,6 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Listenchat.iml" filepath="$PROJECT_DIR$/Listenchat.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/listenchat.iml" filepath="$PROJECT_DIR$/listenchat.iml" />
     </modules>
   </component>
 </project>
