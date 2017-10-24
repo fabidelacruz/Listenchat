@@ -80,7 +80,14 @@ public enum VoiceCommand {
         }
     },
 
-    SEND_MESSAGE(FALSE, "enviar mensaje a") {
+    EXPLAIN(FALSE, "explicar comando") {
+        @Override
+        public void execute(VoiceCommandHandler voiceCommandHandler, String receivedCommand) {
+            voiceCommandHandler.handleExplain(receivedCommand);
+        }
+    },
+
+    SEND_MESSAGE(FALSE, "enviar mensaje a") {Ine
         @Override
         public void execute(VoiceCommandHandler voiceCommandHandler, String receivedCommand) {
             voiceCommandHandler.handleSendMessage(receivedCommand);

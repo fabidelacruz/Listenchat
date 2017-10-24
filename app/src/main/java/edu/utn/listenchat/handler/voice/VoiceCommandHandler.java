@@ -3,6 +3,7 @@ package edu.utn.listenchat.handler.voice;
 import edu.utn.listenchat.handler.common.CommandsHandler;
 import edu.utn.listenchat.handler.common.ConversationHandler;
 import edu.utn.listenchat.handler.common.ExitHandler;
+import edu.utn.listenchat.handler.common.ExplainHandler;
 import edu.utn.listenchat.handler.common.HelpHandler;
 import edu.utn.listenchat.handler.common.NewsHandler;
 import edu.utn.listenchat.handler.common.SendingHandler;
@@ -18,6 +19,7 @@ public class VoiceCommandHandler {
     private ExitHandler exitHandler;
     private CommandsHandler commandsHandler;
     private HelpHandler helpHandler;
+    private ExplainHandler explainHandler;
 
 
     public void handleCommands() {
@@ -61,6 +63,11 @@ public class VoiceCommandHandler {
         exitHandler.handleExit();
     }
 
+    public void handleExplain(String receivedCommand) {
+        String contact = replace(receivedCommand, "explicar comando ", "");
+        this.explainHandler.handleHelp(contact);
+    }
+
     public void handleSendMessage(String receivedMessage) {
         String contact = replace(receivedMessage, "enviar mensaje a ", "");
         this.sendingHandler.prepareMessage(contact);
@@ -91,4 +98,7 @@ public class VoiceCommandHandler {
         this.helpHandler = helpHandler;
     }
 
+    public void setExplainHandler(ExplainHandler explainHandler) {
+        this.explainHandler = explainHandler;
+    }
 }
