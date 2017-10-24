@@ -1,5 +1,6 @@
 package edu.utn.listenchat.handler.voice;
 
+import edu.utn.listenchat.handler.common.CommandsHandler;
 import edu.utn.listenchat.handler.common.ConversationHandler;
 import edu.utn.listenchat.handler.common.ExitHandler;
 import edu.utn.listenchat.handler.common.NewsHandler;
@@ -14,12 +15,11 @@ public class VoiceCommandHandler {
     private SendingHandler sendingHandler;
     private NewsHandler newsHandler;
     private ExitHandler exitHandler;
+    private CommandsHandler commandsHandler;
 
-
-    public void handleCancel() {
-    }
 
     public void handleCommands() {
+        this.commandsHandler.handleCommands();
     }
 
     public void handleConversationWith(String receivedCommand) {
@@ -54,8 +54,8 @@ public class VoiceCommandHandler {
         this.conversationHandler.previousDay();
     }
 
-    public void handleQuit() {
-        exitHandler.handleQuit();
+    public void handleExit() {
+        exitHandler.handleExit();
     }
 
     public void handleSendMessage(String receivedMessage) {
@@ -78,5 +78,9 @@ public class VoiceCommandHandler {
 
     public void setExitHandler(ExitHandler exitHandler) {
         this.exitHandler = exitHandler;
+    }
+
+    public void setCommandsHandler(CommandsHandler commandsHandler) {
+        this.commandsHandler = commandsHandler;
     }
 }

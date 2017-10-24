@@ -10,13 +10,6 @@ import static java.lang.Boolean.TRUE;
 
 public enum VoiceCommand {
 
-    CANCEL(TRUE, "cancelar") {
-        @Override
-        public void execute(VoiceCommandHandler voiceCommandHandler, String receivedCommand) {
-            voiceCommandHandler.handleCancel();
-        }
-    },
-
     COMMANDS(TRUE, "comandos") {
         @Override
         public void execute(VoiceCommandHandler voiceCommandHandler, String receivedCommand) {
@@ -80,10 +73,10 @@ public enum VoiceCommand {
         }
     },
 
-    QUIT(TRUE, "salir") {
+    EXIT(TRUE, "salir") {
         @Override
         public void execute(VoiceCommandHandler voiceCommandHandler, String receivedCommand) {
-            voiceCommandHandler.handleQuit();
+            voiceCommandHandler.handleExit();
         }
     },
 
@@ -118,5 +111,9 @@ public enum VoiceCommand {
     }
 
     public abstract void execute(VoiceCommandHandler voiceCommandHandler, String receivedCommand);
+
+    public String getText() {
+        return text;
+    }
 
 }

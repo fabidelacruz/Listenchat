@@ -6,7 +6,7 @@ public class ExitHandler {
 
     private MainActivity activity;
 
-    public void handleQuit() {
+    public void handleExit() {
         activity.finish();
     }
 
