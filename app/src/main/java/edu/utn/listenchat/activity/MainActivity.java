@@ -16,39 +16,30 @@ import android.view.KeyEvent;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.google.common.collect.Lists;
-
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 
 import edu.utn.listenchat.R;
 import edu.utn.listenchat.db.MessageDao;
 import edu.utn.listenchat.handler.button.ButtonDownHandler;
 import edu.utn.listenchat.handler.button.ButtonUpHandler;
 import edu.utn.listenchat.handler.button.LongPressHandler;
-import edu.utn.listenchat.handler.voice.NotFoundHandler;
 import edu.utn.listenchat.handler.common.SendingHandler;
-import edu.utn.listenchat.model.VoiceCommand;
+import edu.utn.listenchat.handler.voice.NotFoundHandler;
+import edu.utn.listenchat.handler.voice.VoiceCommandHandler;
 import edu.utn.listenchat.model.Message;
+import edu.utn.listenchat.model.VoiceCommand;
 import edu.utn.listenchat.service.DummyLoader;
 import edu.utn.listenchat.service.PersistenceService;
 import edu.utn.listenchat.service.TextToSpeechService;
-import edu.utn.listenchat.handler.voice.VoiceCommandHandler;
 
 import static android.Manifest.permission.RECORD_AUDIO;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.widget.Toast.LENGTH_LONG;
-import static com.google.common.collect.Lists.newArrayList;
 import static edu.utn.listenchat.activity.Injector.injectDependencies;
 import static edu.utn.listenchat.activity.State.getState;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.replace;
-import static org.apache.commons.lang3.StringUtils.split;
 
 public class MainActivity extends ListeningActivity {
 
