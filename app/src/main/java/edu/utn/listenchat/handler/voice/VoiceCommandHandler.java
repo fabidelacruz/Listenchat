@@ -1,6 +1,7 @@
 package edu.utn.listenchat.handler.voice;
 
 import edu.utn.listenchat.handler.common.ConversationHandler;
+import edu.utn.listenchat.handler.common.ExitHandler;
 import edu.utn.listenchat.handler.common.NewsHandler;
 import edu.utn.listenchat.handler.common.SendingHandler;
 
@@ -12,6 +13,7 @@ public class VoiceCommandHandler {
     private ConversationHandler conversationHandler;
     private SendingHandler sendingHandler;
     private NewsHandler newsHandler;
+    private ExitHandler exitHandler;
 
 
     public void handleCancel() {
@@ -53,6 +55,7 @@ public class VoiceCommandHandler {
     }
 
     public void handleQuit() {
+        exitHandler.handleQuit();
     }
 
     public void handleSendMessage(String receivedMessage) {
@@ -73,4 +76,7 @@ public class VoiceCommandHandler {
         this.newsHandler = newsHandler;
     }
 
+    public void setExitHandler(ExitHandler exitHandler) {
+        this.exitHandler = exitHandler;
+    }
 }

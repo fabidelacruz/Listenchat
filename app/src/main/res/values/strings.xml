@@ -1,4 +1,6 @@
 <resources>
     <string name="app_name">Listenchat</string>
     <string name="welcome_message">Bienvenido a Listenchat</string>
+    <string name="facebook_app_id">357021934751239</string>
+    <string name="fb_login_protocol_scheme">fb357021934751239</string>
 </resources>

@@ -3,13 +3,17 @@ package edu.utn.listenchat.connector;
 import android.content.Intent;
 import android.widget.Toast;
 
+import java.util.List;
+
 import edu.utn.listenchat.activity.MainActivity;
+import edu.utn.listenchat.service.PersistenceService;
 
 import static android.widget.Toast.LENGTH_LONG;
 
 public class MessengerConnector {
 
     private MainActivity mainActivity;
+    private PersistenceService persistenceService;
 
     public void send(String message, int id) {
         //Uri uri = Uri.parse("fb-messenger://user/");
@@ -29,8 +33,18 @@ public class MessengerConnector {
         }
     }
 
+    /** Mocked Service - change for real Messenger contacts*/
+    public List<String> obtainContacts() {
+        return this.persistenceService.getContacts();
+    }
+
+
     public void setMainActivity(MainActivity mainActivity) {
         this.mainActivity = mainActivity;
+    }
+
+    public void setPersistenceService(PersistenceService persistenceService) {
+        this.persistenceService = persistenceService;
     }
 
 }
