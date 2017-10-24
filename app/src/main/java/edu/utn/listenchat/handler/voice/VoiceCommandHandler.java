@@ -3,6 +3,7 @@ package edu.utn.listenchat.handler.voice;
 import edu.utn.listenchat.handler.common.CommandsHandler;
 import edu.utn.listenchat.handler.common.ConversationHandler;
 import edu.utn.listenchat.handler.common.ExitHandler;
+import edu.utn.listenchat.handler.common.HelpHandler;
 import edu.utn.listenchat.handler.common.NewsHandler;
 import edu.utn.listenchat.handler.common.SendingHandler;
 
@@ -16,6 +17,7 @@ public class VoiceCommandHandler {
     private NewsHandler newsHandler;
     private ExitHandler exitHandler;
     private CommandsHandler commandsHandler;
+    private HelpHandler helpHandler;
 
 
     public void handleCommands() {
@@ -36,6 +38,7 @@ public class VoiceCommandHandler {
     }
 
     public void handleHelp() {
+        this.helpHandler.handleHelp();
     }
 
     public void handleNewMessages() {
@@ -83,4 +86,9 @@ public class VoiceCommandHandler {
     public void setCommandsHandler(CommandsHandler commandsHandler) {
         this.commandsHandler = commandsHandler;
     }
+
+    public void setHelpHandler(HelpHandler helpHandler) {
+        this.helpHandler = helpHandler;
+    }
+
 }

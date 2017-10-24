@@ -10,6 +10,7 @@ import edu.utn.listenchat.handler.button.LongPressHandler;
 import edu.utn.listenchat.handler.common.CommandsHandler;
 import edu.utn.listenchat.handler.common.ConversationHandler;
 import edu.utn.listenchat.handler.common.ExitHandler;
+import edu.utn.listenchat.handler.common.HelpHandler;
 import edu.utn.listenchat.handler.common.NewsHandler;
 import edu.utn.listenchat.handler.common.SendingHandler;
 import edu.utn.listenchat.handler.voice.NotFoundHandler;
@@ -57,12 +58,16 @@ public class Injector {
         CommandsHandler commandsHandler = new CommandsHandler();
         commandsHandler.setTextToSpeechService(textToSpeechService);
 
+        HelpHandler helpHandler = new HelpHandler();
+        helpHandler.setTextToSpeechService(textToSpeechService);
+
         VoiceCommandHandler voiceCommandHandler = new VoiceCommandHandler();
         voiceCommandHandler.setConversationHandler(conversationHandler);
         voiceCommandHandler.setSendingHandler(sendingHandler);
         voiceCommandHandler.setNewsHandler(newsHandler);
         voiceCommandHandler.setExitHandler(exitHandler);
         voiceCommandHandler.setCommandsHandler(commandsHandler);
+        voiceCommandHandler.setHelpHandler(helpHandler);
 
         NotFoundHandler notFoundHandler = new NotFoundHandler();
         notFoundHandler.setTextToSpeechService(textToSpeechService);
