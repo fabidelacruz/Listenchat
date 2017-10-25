@@ -16,7 +16,7 @@ public class CommandsHandler {
     private TextToSpeechService textToSpeechService;
 
     public void handleCommands() {
-        this.textToSpeechService.speak("Los comandos de voz son");
+        this.textToSpeechService.speak("Comandos de voz");
         this.textToSpeechService.speak(NOVELTIES.getText());
         this.textToSpeechService.speak(NEW_MESSAGES.getText());
         this.textToSpeechService.speak(CONVERSATION_WITH.getText());

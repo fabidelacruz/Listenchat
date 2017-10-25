@@ -23,6 +23,7 @@ public class ExplainHandler {
         VoiceCommand voiceCommand = VoiceCommand.findCommand(command);
         if (voiceCommand == null) {
             this.notFoundHandler.sayMessage();
+            return;
         }
 
         switch (voiceCommand) {
@@ -34,14 +35,14 @@ public class ExplainHandler {
                 break;
             case CONVERSATION_WITH:
                 this.say(CONVERSATION_WITH, ". Seguido del nombre del contacto. Permite recorrer " +
-                        "todos los mensajes enviados y recibidos con éste, ordenados cronolóogiamente." +
-                        "Por defecto se comienza a recorrer desde el primer mensaje del último día" +
-                        "de conversación. Para recorrer los mensajes del mismo día diga los comandos " +
-                        "siguiente y anterior. Para saltar de un día hacia otro diga dia siguiente" +
-                        "y dia anterior");
+                        "todos los mensajes enviados y recibidos con este contacto, ordenados " +
+                        "cronológicamente. Se comienza a recorrer desde el primer mensaje del " +
+                        "último día de conversación. Para recorrer los mensajes del mismo día dicte " +
+                        "los comandos. Siguiente. Y. Anterior. Para saltar de día de conversación " +
+                        "dicte los comandos. Día siguiente. Y. Día anterior");
                 break;
             case SEND_MESSAGE:
-                this.say(SEND_MESSAGE, ". Seguido del nombre del contacto. Permite enviar un mensaje" +
+                this.say(SEND_MESSAGE, ". Seguido del nombre del contacto. Permite enviar un mensaje " +
                         "de voz para un contacto. Luego del dictado, se abrirá la aplicación de " +
                         "messenger esperando que el usuario confirme el envío.");
                 break;
@@ -52,7 +53,7 @@ public class ExplainHandler {
                 this.say(EXIT, "Permite cerrar la aplicación");
                 break;
             case HELP:
-                this.say((HELP), "Cuenta un breve puntapié inicial para que puedas comenzar a usar" +
+                this.say((HELP), "Cuenta un breve puntapié inicial para que puedas comenzar a usar " +
                         "Listenchat");
                 break;
             default:

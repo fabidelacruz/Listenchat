@@ -2,13 +2,20 @@ package edu.utn.listenchat.model;
 
 import edu.utn.listenchat.handler.voice.VoiceCommandHandler;
 
-import static edu.utn.listenchat.utils.StringUtils.safeContains;
 import static edu.utn.listenchat.utils.StringUtils.safeEquals;
+import static edu.utn.listenchat.utils.StringUtils.safeStartsWith;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 
 
 public enum VoiceCommand {
+
+    AGAIN(TRUE, "de nuevo") {
+        @Override
+        public void execute(VoiceCommandHandler voiceCommandHandler, String receivedCommand) {
+            voiceCommandHandler.handleAgain();
+        }
+    },
 
     COMMANDS(TRUE, "comandos") {
         @Override
@@ -87,7 +94,7 @@ public enum VoiceCommand {
         }
     },
 
-    SEND_MESSAGE(FALSE, "enviar mensaje a") {Ine
+    SEND_MESSAGE(FALSE, "enviar mensaje a") {
         @Override
         public void execute(VoiceCommandHandler voiceCommandHandler, String receivedCommand) {
             voiceCommandHandler.handleSendMessage(receivedCommand);
@@ -114,7 +121,7 @@ public enum VoiceCommand {
     }
 
     private boolean match(String receivedCommand) {
-        return this.fullMatch ? safeEquals(receivedCommand, this.text) : safeContains(receivedCommand, this.text);
+        return this.fullMatch ? safeEquals(receivedCommand, this.text) : safeStartsWith(receivedCommand, this.text);
     }
 
     public abstract void execute(VoiceCommandHandler voiceCommandHandler, String receivedCommand);

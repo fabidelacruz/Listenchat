@@ -176,7 +176,11 @@ public class MainActivity extends ListeningActivity {
     private void processCommand(String receivedCommand) {
         VoiceCommand voiceCommand = VoiceCommand.findCommand(receivedCommand);
         if (voiceCommand != null) {
-            voiceCommand.execute(this.voiceCommandHandler, receivedCommand);
+            try {
+                voiceCommand.execute(this.voiceCommandHandler, receivedCommand);
+            } catch (IllegalStateException e) {
+                this.textToSpeechService.speak(e.getMessage());
+            }
         } else {
             this.notFoundHandler.sayMessage();
         }

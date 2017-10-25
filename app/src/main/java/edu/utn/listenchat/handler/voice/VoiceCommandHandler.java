@@ -21,6 +21,9 @@ public class VoiceCommandHandler {
     private HelpHandler helpHandler;
     private ExplainHandler explainHandler;
 
+    public void handleAgain() {
+        this.conversationHandler.again();
+    }
 
     public void handleCommands() {
         this.commandsHandler.handleCommands();
