@@ -1,7 +1,7 @@
 package edu.utn.listenchat.handler.common;
 
 
-import org.apache.commons.lang3.StringUtils;
+import android.widget.Toast;
 
 import java.util.Date;
 
@@ -43,6 +43,7 @@ public class SendingHandler {
         if ("cancelar".equalsIgnoreCase(text)) {
             textToSpeechService.speak("Envío cancelado");
         } else {
+            Toast.makeText(mainActivity, "Mensaje: " + text, Toast.LENGTH_LONG).show();
             this.messengerConnector.send(text, 0);
             Message message = Message.create(getState().getCurrentContact(), text, new Date(), "O");
             persistenceService.insert(mainActivity, message);
