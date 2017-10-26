@@ -1,8 +1,10 @@
 package edu.utn.listenchat.handler.button;
 
-import edu.utn.listenchat.activity.MainActivity;
 import edu.utn.listenchat.activity.State;
+import edu.utn.listenchat.handler.common.CommandsHandler;
 import edu.utn.listenchat.handler.common.ConversationHandler;
+import edu.utn.listenchat.handler.common.ExitHandler;
+import edu.utn.listenchat.handler.common.HelpHandler;
 import edu.utn.listenchat.handler.common.NewsHandler;
 import edu.utn.listenchat.model.MenuStep;
 import edu.utn.listenchat.model.Step;
@@ -18,6 +20,9 @@ public class ButtonOkHandler {
     private NewsHandler newsHandler;
     private TextToSpeechService textToSpeechService;
     private ConversationHandler conversationHandler;
+    private CommandsHandler commandsHandler;
+    private HelpHandler helpHandler;
+    private ExitHandler exitHandler;
 
     public boolean handle() {
         textToSpeechService.stop();
@@ -47,6 +52,20 @@ public class ButtonOkHandler {
                         step.setStep(CONVERSATION);
                         this.textToSpeechService.speak(SELECT_CONTACT.getDescription());
                         break;
+
+                    case HELP:
+                        helpHandler.handleHelp();
+                        step = null;
+                        break;
+
+                    case COMMANDS:
+                        commandsHandler.handleCommands();
+                        step = null;
+                        break;
+
+                    case EXIT:
+                        exitHandler.handleExit();
+                        break;
                 }
             } else if (CONVERSATION.equals(step.getStep()) && SELECT_CONTACT.equals(step.getSubstep())
                     && step.getContact() != null) {
@@ -72,4 +91,15 @@ public class ButtonOkHandler {
         this.conversationHandler = conversationHandler;
     }
 
+    public void setCommandsHandler(CommandsHandler commandsHandler) {
+        this.commandsHandler = commandsHandler;
+    }
+
+    public void setHelpHandler(HelpHandler helpHandler) {
+        this.helpHandler = helpHandler;
+    }
+
+    public void setExitHandler(ExitHandler exitHandler) {
+        this.exitHandler = exitHandler;
+    }
 }

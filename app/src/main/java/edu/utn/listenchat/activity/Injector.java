@@ -81,6 +81,9 @@ public class Injector {
         ButtonOkHandler buttonOkHandler = new ButtonOkHandler();
         buttonOkHandler.setTextToSpeechService(textToSpeechService);
         buttonOkHandler.setConversationHandler(conversationHandler);
+        buttonOkHandler.setExitHandler(exitHandler);
+        buttonOkHandler.setHelpHandler(helpHandler);
+        buttonOkHandler.setCommandsHandler(commandsHandler);
         buttonOkHandler.setNewsHandler(newsHandler);
 
         ButtonUpHandler buttonUpHandler = new ButtonUpHandler();
