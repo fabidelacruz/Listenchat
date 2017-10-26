@@ -5,11 +5,12 @@ import android.view.KeyEvent;
 import java.util.List;
 
 import edu.utn.listenchat.activity.MainActivity;
-import edu.utn.listenchat.activity.State;
 import edu.utn.listenchat.handler.common.ConversationHandler;
+import edu.utn.listenchat.handler.common.ExplainHandler;
 import edu.utn.listenchat.model.MenuStep;
 import edu.utn.listenchat.model.Step;
 import edu.utn.listenchat.model.Substep;
+import edu.utn.listenchat.model.VoiceCommand;
 import edu.utn.listenchat.service.PersistenceService;
 import edu.utn.listenchat.service.TextToSpeechService;
 
@@ -22,6 +23,8 @@ import static android.view.KeyEvent.KEYCODE_VOLUME_DOWN;
 import static android.view.KeyEvent.KEYCODE_VOLUME_UP;
 import static edu.utn.listenchat.activity.State.getState;
 import static edu.utn.listenchat.model.Step.CONVERSATION;
+import static edu.utn.listenchat.model.Step.EXPLAIN;
+import static edu.utn.listenchat.model.Substep.SELECT_COMMAND;
 import static edu.utn.listenchat.model.Substep.SELECT_CONTACT;
 import static java.lang.Boolean.TRUE;
 
@@ -84,6 +87,14 @@ public class ButtonDownHandler {
             return true;
         }
 
+        if (EXPLAIN.equals(step.getStep())) {
+            if (SELECT_COMMAND.equals(step.getSubstep())) {
+                previousCommand();
+            }
+
+            return true;
+        }
+
         return false;
     }
 
@@ -104,6 +115,34 @@ public class ButtonDownHandler {
             textToSpeechService.speak("No hay contactos");
             step = null;
         }
+
+    }
+
+    private void previousCommand() {
+        List<VoiceCommand> commands = ExplainHandler.AVAILABLE_COMMAND;
+
+        if (getState().getExplainedCommand() == null) {
+            getState().setExplainedCommand(commands.get(0));
+        } else {
+            int idx = commands.indexOf(getState().getExplainedCommand()) - 1;
+            getState().setExplainedCommand(idx >= 0 ? commands.get(idx) : commands.get(commands.size() - 1));
+        }
+
+        textToSpeechService.speak(getState().getExplainedCommand().getText());
+
+    }
+
+    private void nextCommand() {
+        List<VoiceCommand> commands = ExplainHandler.AVAILABLE_COMMAND;
+
+        if (getState().getExplainedCommand() == null) {
+            getState().setExplainedCommand(commands.get(0));
+        } else {
+            int idx = commands.indexOf(getState().getExplainedCommand()) + 1;
+            getState().setExplainedCommand(idx <= commands.size() - 1 ? commands.get(idx) : commands.get(0));
+        }
+
+        textToSpeechService.speak(getState().getExplainedCommand().getText());
 
     }
 
@@ -128,6 +167,14 @@ public class ButtonDownHandler {
                 nextContact();
             } else {
                 this.conversationHandler.following();
+            }
+
+            return true;
+        }
+
+        if (EXPLAIN.equals(step.getStep())) {
+            if (SELECT_COMMAND.equals(step.getSubstep())) {
+                nextCommand();
             }
 
             return true;

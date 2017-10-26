@@ -4,6 +4,7 @@ import edu.utn.listenchat.activity.State;
 import edu.utn.listenchat.handler.common.CommandsHandler;
 import edu.utn.listenchat.handler.common.ConversationHandler;
 import edu.utn.listenchat.handler.common.ExitHandler;
+import edu.utn.listenchat.handler.common.ExplainHandler;
 import edu.utn.listenchat.handler.common.HelpHandler;
 import edu.utn.listenchat.handler.common.NewsHandler;
 import edu.utn.listenchat.model.MenuStep;
@@ -12,6 +13,8 @@ import edu.utn.listenchat.model.Substep;
 import edu.utn.listenchat.service.TextToSpeechService;
 
 import static edu.utn.listenchat.model.Step.CONVERSATION;
+import static edu.utn.listenchat.model.Step.EXPLAIN;
+import static edu.utn.listenchat.model.Substep.SELECT_COMMAND;
 import static edu.utn.listenchat.model.Substep.SELECT_CONTACT;
 
 
@@ -23,6 +26,7 @@ public class ButtonOkHandler {
     private CommandsHandler commandsHandler;
     private HelpHandler helpHandler;
     private ExitHandler exitHandler;
+    private ExplainHandler explainHandler;
 
     public boolean handle() {
         textToSpeechService.stop();
@@ -32,6 +36,7 @@ public class ButtonOkHandler {
             step = new MenuStep();
             step.setStep(Step.MAIN);
             step.setSubstep(Substep.MESSAGES);
+            State.getState().setMenuStep(step);
             textToSpeechService.speak("Menú principal");
             textToSpeechService.speak(step.getSubstep().getDescription());
         } else {
@@ -39,15 +44,16 @@ public class ButtonOkHandler {
                 switch (step.getSubstep()) {
                     case NOVELTIES:
                         this.newsHandler.sayNovelties();
-                        step = null;
+                        State.getState().setMenuStep(null);
                         break;
 
                     case MESSAGES:
                         this.newsHandler.sayNewMessages();
-                        step = null;
+                        State.getState().setMenuStep(null);
                         break;
 
                     case CONVERSATION:
+                    case SEND_MESSAGE:
                         step.setSubstep(SELECT_CONTACT);
                         step.setStep(CONVERSATION);
                         this.textToSpeechService.speak(SELECT_CONTACT.getDescription());
@@ -55,22 +61,32 @@ public class ButtonOkHandler {
 
                     case HELP:
                         helpHandler.handleHelp();
-                        step = null;
+                        State.getState().setMenuStep(null);
                         break;
 
                     case COMMANDS:
                         commandsHandler.handleCommands();
-                        step = null;
+                        State.getState().setMenuStep(null);
                         break;
 
                     case EXIT:
                         exitHandler.handleExit();
+                        break;
+
+                    case EXPLAIN:
+                        step.setStep(EXPLAIN);
+                        step.setSubstep(SELECT_COMMAND);
+                        this.textToSpeechService.speak(SELECT_COMMAND.getDescription());
                         break;
                 }
             } else if (CONVERSATION.equals(step.getStep()) && SELECT_CONTACT.equals(step.getSubstep())
                     && step.getContact() != null) {
                 step.setSubstep(Substep.READ);
                 this.conversationHandler.prepareConversation(step.getContact());
+            }  else if (EXPLAIN.equals(step.getStep()) && SELECT_COMMAND.equals(step.getSubstep())
+                    && step.getContact() != null) {
+                this.explainHandler.handleHelp(State.getState().getExplainedCommand().getText());
+                State.getState().setMenuStep(null);
             }
 
         }
@@ -101,5 +117,9 @@ public class ButtonOkHandler {
 
     public void setExitHandler(ExitHandler exitHandler) {
         this.exitHandler = exitHandler;
+    }
+
+    public void setExplainHandler(ExplainHandler explainHandler) {
+        this.explainHandler = explainHandler;
     }
 }

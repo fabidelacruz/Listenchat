@@ -1,5 +1,9 @@
 package edu.utn.listenchat.handler.common;
 
+import com.google.common.collect.Lists;
+
+import java.util.List;
+
 import edu.utn.listenchat.handler.voice.NotFoundHandler;
 import edu.utn.listenchat.model.VoiceCommand;
 import edu.utn.listenchat.service.TextToSpeechService;
@@ -14,6 +18,9 @@ import static edu.utn.listenchat.model.VoiceCommand.SEND_MESSAGE;
 import static java.lang.String.format;
 
 public class ExplainHandler {
+
+    public static final List<VoiceCommand> AVAILABLE_COMMAND = Lists.newArrayList(NOVELTIES,
+            NEW_MESSAGES, CONVERSATION_WITH, SEND_MESSAGE, COMMANDS, EXIT, HELP);
 
     private TextToSpeechService textToSpeechService;
     private NotFoundHandler notFoundHandler;

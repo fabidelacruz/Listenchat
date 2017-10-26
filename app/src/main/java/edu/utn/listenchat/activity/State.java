@@ -2,6 +2,7 @@ package edu.utn.listenchat.activity;
 
 
 import edu.utn.listenchat.model.MenuStep;
+import edu.utn.listenchat.model.VoiceCommand;
 
 public class State {
 
@@ -28,6 +29,7 @@ public class State {
     /** Buttons */
     private boolean shortPress;
     private MenuStep menuStep;
+    private VoiceCommand explainedCommand;
 
 
     public boolean isSendingMessageMode() {
@@ -86,4 +88,11 @@ public class State {
         this.menuStep = menuStep;
     }
 
+    public VoiceCommand getExplainedCommand() {
+        return explainedCommand;
+    }
+
+    public void setExplainedCommand(VoiceCommand explainedCommand) {
+        this.explainedCommand = explainedCommand;
+    }
 }

@@ -7,13 +7,18 @@ package edu.utn.listenchat.model;
 public enum Substep {
 
     MESSAGES("Mensajes nuevos", Step.MAIN),
+    SEND_MESSAGE("Enviar mensaje", Step.MAIN),
     NOVELTIES("Novedades", Step.MAIN),
     CONVERSATION("Conversación", Step.MAIN),
     COMMANDS("Comandos", Step.MAIN),
-    EXIT("Salir", Step.MAIN),
     HELP("Ayuda", Step.MAIN),
+    EXPLAIN("Explicar comando", Step.MAIN),
+    EXIT("Salir", Step.MAIN),
     SELECT_CONTACT("Seleccione contacto", Step.CONVERSATION),
-    READ("", Step.CONVERSATION);
+    SELECT_COMMAND("Seleccione comando", Step.EXPLAIN),
+    READ("", Step.CONVERSATION),
+    SEND("", Step.CONVERSATION);
+
 
     Substep(String description, Step step) {
         this.description = description;
