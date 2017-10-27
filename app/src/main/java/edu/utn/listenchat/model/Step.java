@@ -9,6 +9,7 @@ public enum Step {
     MAIN(""),
     NEW_MESSAGES("Mensajes nuevos"),
     CONVERSATION("Conversaciòn"),
+    MESSAGE("enviar mensaje"),
     NOVELTIES("Novedades"),
     EXPLAIN("Explicar comando");
 

@@ -7,7 +7,7 @@ package edu.utn.listenchat.model;
 public enum Substep {
 
     MESSAGES("Mensajes nuevos", Step.MAIN),
-    SEND_MESSAGE("Enviar mensaje", Step.MAIN),
+    //SEND_MESSAGE("Enviar mensaje", Step.MAIN),
     NOVELTIES("Novedades", Step.MAIN),
     CONVERSATION("Conversación", Step.MAIN),
     COMMANDS("Comandos", Step.MAIN),
@@ -17,7 +17,7 @@ public enum Substep {
     SELECT_CONTACT("Seleccione contacto", Step.CONVERSATION),
     SELECT_COMMAND("Seleccione comando", Step.EXPLAIN),
     READ("", Step.CONVERSATION),
-    SEND("", Step.CONVERSATION);
+    SEND("", Step.MESSAGE);
 
 
     Substep(String description, Step step) {
@@ -33,13 +33,16 @@ public enum Substep {
     }
 
     public static Substep previous(Substep substep) {
+        Substep selected = null;
         for (Substep value: values()) {
             if (value.step.equals(substep.step) && value.ordinal() <= substep.ordinal() - 1) {
-                return value;
+                if (selected == null || selected.ordinal() < value.ordinal()) {
+                    selected = value;
+                }
             }
         }
 
-        return substep;
+        return selected != null ? selected : substep;
     }
 
     public static Substep next(Substep substep) {

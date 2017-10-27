@@ -14,6 +14,7 @@ import edu.utn.listenchat.service.TextToSpeechService;
 
 import static edu.utn.listenchat.model.Step.CONVERSATION;
 import static edu.utn.listenchat.model.Step.EXPLAIN;
+import static edu.utn.listenchat.model.Step.MESSAGE;
 import static edu.utn.listenchat.model.Substep.SELECT_COMMAND;
 import static edu.utn.listenchat.model.Substep.SELECT_CONTACT;
 
@@ -53,12 +54,17 @@ public class ButtonOkHandler {
                         break;
 
                     case CONVERSATION:
-                    case SEND_MESSAGE:
                         step.setSubstep(SELECT_CONTACT);
                         step.setStep(CONVERSATION);
                         this.textToSpeechService.speak(SELECT_CONTACT.getDescription());
                         break;
-
+/*
+                    case SEND_MESSAGE:
+                        step.setSubstep(SELECT_CONTACT);
+                        step.setStep(MESSAGE);
+                        this.textToSpeechService.speak(SELECT_CONTACT.getDescription());
+                        break;
+*/
                     case HELP:
                         helpHandler.handleHelp();
                         State.getState().setMenuStep(null);
@@ -80,6 +86,10 @@ public class ButtonOkHandler {
                         break;
                 }
             } else if (CONVERSATION.equals(step.getStep()) && SELECT_CONTACT.equals(step.getSubstep())
+                    && step.getContact() != null) {
+                step.setSubstep(Substep.READ);
+                this.conversationHandler.prepareConversation(step.getContact());
+            } else if (MESSAGE.equals(step.getStep()) && SELECT_CONTACT.equals(step.getSubstep())
                     && step.getContact() != null) {
                 step.setSubstep(Substep.READ);
                 this.conversationHandler.prepareConversation(step.getContact());
