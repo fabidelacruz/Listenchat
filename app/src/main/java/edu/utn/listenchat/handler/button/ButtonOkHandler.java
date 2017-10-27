@@ -84,7 +84,7 @@ public class ButtonOkHandler {
                 step.setSubstep(Substep.READ);
                 this.conversationHandler.prepareConversation(step.getContact());
             }  else if (EXPLAIN.equals(step.getStep()) && SELECT_COMMAND.equals(step.getSubstep())
-                    && step.getContact() != null) {
+                    && State.getState().getExplainedCommand() != null) {
                 this.explainHandler.handleHelp(State.getState().getExplainedCommand().getText());
                 State.getState().setMenuStep(null);
             }
