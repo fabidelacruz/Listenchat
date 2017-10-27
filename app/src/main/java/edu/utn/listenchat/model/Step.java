@@ -9,7 +9,8 @@ public enum Step {
     MAIN(""),
     NEW_MESSAGES("Mensajes nuevos"),
     CONVERSATION("Conversaciòn"),
-    NOVELTIES("Novedades");
+    NOVELTIES("Novedades"),
+    EXPLAIN("Explicar comando");
 
     Step(String description) {
         this.description = description;
