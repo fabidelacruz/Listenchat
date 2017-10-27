@@ -36,6 +36,8 @@ public class DummyLoader {
         messages.add(Message.create("Fabi De La Cruz", "Chau 12", toDate("2017-09-06T00:11:22"), "I"));
         messages.add(Message.create("Fabi De La Cruz", "Chau 13", toDate("2017-09-06T00:11:22"), "I"));
 
+        messages.add(Message.create("Maximiliano Bolia Morales", "Hola soy Maxi", toDate("2017-09-06T00:11:22"), "I"));
+
         persistenceService.insert(messages);
     }
 
