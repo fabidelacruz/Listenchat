@@ -15,6 +15,7 @@ import edu.utn.listenchat.service.PersistenceService;
 import edu.utn.listenchat.service.TextToSpeechService;
 
 import static android.view.KeyEvent.KEYCODE_HEADSETHOOK;
+import static android.view.KeyEvent.KEYCODE_HOME;
 import static android.view.KeyEvent.KEYCODE_MEDIA_NEXT;
 import static android.view.KeyEvent.KEYCODE_MEDIA_PLAY;
 import static android.view.KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE;
@@ -51,6 +52,7 @@ public class ButtonDownHandler {
             case KEYCODE_MEDIA_PLAY_PAUSE:
             case KEYCODE_MEDIA_PLAY:
             case KEYCODE_HEADSETHOOK:
+            case KEYCODE_HOME:
                 event.startTracking();
                 if(event.getRepeatCount() == 0){
                     getState().setShortPress(TRUE);
