@@ -4,9 +4,9 @@ import com.google.common.collect.Lists;
 
 import java.util.List;
 
+import edu.utn.listenchat.handler.AbstractHandler;
 import edu.utn.listenchat.handler.voice.NotFoundHandler;
 import edu.utn.listenchat.model.VoiceCommand;
-import edu.utn.listenchat.service.TextToSpeechService;
 
 import static edu.utn.listenchat.model.VoiceCommand.COMMANDS;
 import static edu.utn.listenchat.model.VoiceCommand.CONVERSATION_WITH;
@@ -17,17 +17,18 @@ import static edu.utn.listenchat.model.VoiceCommand.NOVELTIES;
 import static edu.utn.listenchat.model.VoiceCommand.SEND_MESSAGE;
 import static java.lang.String.format;
 
-public class ExplainHandler {
+public class ExplainHandler extends AbstractHandler {
 
     public static final List<VoiceCommand> AVAILABLE_COMMAND = Lists.newArrayList(NOVELTIES,
             NEW_MESSAGES, CONVERSATION_WITH, SEND_MESSAGE, COMMANDS, EXIT, HELP);
 
-    private TextToSpeechService textToSpeechService;
     private NotFoundHandler notFoundHandler;
 
     public void handleHelp(String command) {
+        stopListening();
 
         VoiceCommand voiceCommand = VoiceCommand.findCommand(command);
+
         if (voiceCommand == null) {
             this.notFoundHandler.sayMessage();
             return;
@@ -45,8 +46,8 @@ public class ExplainHandler {
                         "todos los mensajes enviados y recibidos con este contacto, ordenados " +
                         "cronológicamente. Se comienza a recorrer desde el primer mensaje del " +
                         "último día de conversación. Para recorrer los mensajes del mismo día dicte " +
-                        "los comandos. Siguiente. Y. Anterior. Para saltar de día de conversación " +
-                        "dicte los comandos. Día siguiente. Y. Día anterior");
+                        "los comandos. Siguiente. y. Anterior. Para saltar de día de conversación " +
+                        "dicte los comandos. Día siguiente. y. Día anterior");
                 break;
             case SEND_MESSAGE:
                 this.say(SEND_MESSAGE, ". Seguido del nombre del contacto. Permite enviar un mensaje " +
@@ -64,16 +65,12 @@ public class ExplainHandler {
                         "Listenchat");
                 break;
             default:
-                this.textToSpeechService.speak("Comando no explicado");
+                this.textToSpeechService.speak("Comando no explicado", getResumeCallback());
         }
     }
 
     private void say(VoiceCommand command, String text) {
-        this.textToSpeechService.speak(format("%s: %s", command.getText(), text));
-    }
-
-    public void setTextToSpeechService(TextToSpeechService textToSpeechService) {
-        this.textToSpeechService = textToSpeechService;
+        this.textToSpeechService.speak(format("%s: %s", command.getText(), text), getResumeCallback());
     }
 
     public void setNotFoundHandler(NotFoundHandler notFoundHandler) {

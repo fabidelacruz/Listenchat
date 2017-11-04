@@ -42,13 +42,15 @@ public class Injector {
         NewsHandler newsHandler = new NewsHandler();
         newsHandler.setPersistenceService(persistenceService);
         newsHandler.setTextToSpeechService(textToSpeechService);
+        newsHandler.setActivity(mainActivity);
 
         ConversationHandler conversationHandler = new ConversationHandler();
         conversationHandler.setTextToSpeechService(textToSpeechService);
         conversationHandler.setMessageDao(messageDao);
+        conversationHandler.setActivity(mainActivity);
 
         SendingHandler sendingHandler = new SendingHandler();
-        sendingHandler.setMainActivity(mainActivity);
+        sendingHandler.setActivity(mainActivity);
         sendingHandler.setTextToSpeechService(textToSpeechService);
         sendingHandler.setPersistenceService(persistenceService);
         sendingHandler.setMessengerConnector(messengerConnector);
@@ -58,9 +60,11 @@ public class Injector {
 
         CommandsHandler commandsHandler = new CommandsHandler();
         commandsHandler.setTextToSpeechService(textToSpeechService);
+        commandsHandler.setActivity(mainActivity);
 
         HelpHandler helpHandler = new HelpHandler();
         helpHandler.setTextToSpeechService(textToSpeechService);
+        helpHandler.setActivity(mainActivity);
 
         NotFoundHandler notFoundHandler = new NotFoundHandler();
         notFoundHandler.setTextToSpeechService(textToSpeechService);
@@ -68,6 +72,7 @@ public class Injector {
         ExplainHandler explainHandler = new ExplainHandler();
         explainHandler.setTextToSpeechService(textToSpeechService);
         explainHandler.setNotFoundHandler(notFoundHandler);
+        explainHandler.setActivity(mainActivity);
 
         VoiceCommandHandler voiceCommandHandler = new VoiceCommandHandler();
         voiceCommandHandler.setConversationHandler(conversationHandler);

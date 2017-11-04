@@ -3,13 +3,10 @@ package edu.utn.listenchat.handler.common;
 
 import android.widget.Toast;
 
-import java.util.Date;
-
-import edu.utn.listenchat.activity.MainActivity;
 import edu.utn.listenchat.connector.MessengerConnector;
+import edu.utn.listenchat.handler.AbstractHandler;
 import edu.utn.listenchat.model.Message;
 import edu.utn.listenchat.service.PersistenceService;
-import edu.utn.listenchat.service.TextToSpeechService;
 
 import static edu.utn.listenchat.activity.State.getState;
 import static edu.utn.listenchat.model.Message.createOutgoingMessage;
@@ -21,30 +18,30 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 
-public class SendingHandler {
+public class SendingHandler extends AbstractHandler {
 
-    private MainActivity mainActivity;
-    private TextToSpeechService textToSpeechService;
     private MessengerConnector messengerConnector;
     private PersistenceService persistenceService;
 
 
     public void prepareMessage(String contact) {
+        stopListening();
         String msnContact = this.findMsnContact(contact);
         if (isNotBlank(msnContact)) {
             getState().setSendingMessageMode(TRUE);
             getState().setCurrentContact(msnContact);
-            textToSpeechService.speak(format("Mensaje a %s. Diga", msnContact));
+            textToSpeechService.speak(format("Mensaje a %s. Diga", msnContact), getResumeCallback());
         } else {
-            textToSpeechService.speak(format("No se ha encontrado el contacto %s", contact));
+            textToSpeechService.speak(format("No se ha encontrado el contacto %s", contact), getResumeCallback());
         }
     }
 
     public void sendMessage(String text) {
+        stopListening();
         if ("cancelar".equalsIgnoreCase(text)) {
-            textToSpeechService.speak("Envío cancelado");
+            textToSpeechService.speak("Envío cancelado", getResumeCallback());
         } else {
-            Toast.makeText(mainActivity, "Mensaje: " + text, Toast.LENGTH_LONG).show();
+            Toast.makeText(activity, "Mensaje: " + text, Toast.LENGTH_LONG).show();
             this.messengerConnector.send(text, 0);
             Message message = createOutgoingMessage(getState().getCurrentContact(), text);
             persistenceService.insert(message);
@@ -59,14 +56,6 @@ public class SendingHandler {
             }
         }
         return EMPTY;
-    }
-
-    public void setMainActivity(MainActivity mainActivity) {
-        this.mainActivity = mainActivity;
-    }
-
-    public void setTextToSpeechService(TextToSpeechService textToSpeechService) {
-        this.textToSpeechService = textToSpeechService;
     }
 
     public void setMessengerConnector(MessengerConnector messengerConnector) {

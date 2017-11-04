@@ -9,10 +9,10 @@ import com.google.common.collect.Multimap;
 import java.util.Collection;
 import java.util.List;
 
+import edu.utn.listenchat.handler.AbstractHandler;
 import edu.utn.listenchat.model.Message;
 import edu.utn.listenchat.model.MessageStatus;
 import edu.utn.listenchat.service.PersistenceService;
-import edu.utn.listenchat.service.TextToSpeechService;
 import edu.utn.listenchat.utils.CursorUtils;
 
 import static edu.utn.listenchat.model.MessageStatus.ARCHIVED;
@@ -20,14 +20,12 @@ import static edu.utn.listenchat.model.MessageStatus.LISTENED;
 import static edu.utn.listenchat.utils.CursorUtils.messagesByContact;
 import static java.lang.String.format;
 
-
-public class NewsHandler {
+public class NewsHandler extends AbstractHandler {
 
     private PersistenceService persistenceService;
-    private TextToSpeechService textToSpeechService;
-
 
     public void sayNovelties() {
+        stopListening();
         Cursor cursor = persistenceService.getNewsCursor();
 
         Multimap<String, Message> allMessages = messagesByContact(cursor);
@@ -40,12 +38,14 @@ public class NewsHandler {
                 Log.i("MENSAJES", stringBuilder.toString());
                 textToSpeechService.speak(stringBuilder.toString());
             }
+            textToSpeechService.speak("", getResumeCallback());
         } else {
-            textToSpeechService.speak("Usted no ha recibido ningún mensaje nuevo");
+            textToSpeechService.speak("Usted no ha recibido ningún mensaje nuevo", getResumeCallback());
         }
     }
 
     public void sayNewMessages() {
+        stopListening();
         Cursor cursor = persistenceService.getNewsCursor();
 
         Multimap<String, Message> allMessages = messagesByContact(cursor);
@@ -61,8 +61,9 @@ public class NewsHandler {
                 this.textToSpeechService.speak(stringBuilder.toString());
                 this.updateStatus(userMessages, LISTENED);
             }
+            textToSpeechService.speak("", getResumeCallback());
         } else {
-            textToSpeechService.speak("Usted no ha recibido ningún mensaje nuevo");
+            textToSpeechService.speak("Usted no ha recibido ningún mensaje nuevo", getResumeCallback());
         }
     }
 
@@ -86,10 +87,6 @@ public class NewsHandler {
 
     public void setPersistenceService(PersistenceService persistenceService) {
         this.persistenceService = persistenceService;
-    }
-
-    public void setTextToSpeechService(TextToSpeechService textToSpeechService) {
-        this.textToSpeechService = textToSpeechService;
     }
 
 }

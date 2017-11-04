@@ -1,7 +1,5 @@
 package edu.utn.listenchat.service;
 
-import android.content.Context;
-
 import com.google.common.collect.Lists;
 
 import java.util.List;

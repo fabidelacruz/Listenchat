@@ -11,7 +11,7 @@ import org.junit.runner.RunWith;
 
 import edu.utn.listenchat.activity.MainActivity;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Instrumentation test, which will execute on an Android device.

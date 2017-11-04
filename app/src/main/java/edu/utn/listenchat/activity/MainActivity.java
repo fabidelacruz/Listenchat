@@ -16,9 +16,6 @@ import android.view.KeyEvent;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.facebook.AccessToken;
-import com.facebook.login.LoginManager;
-
 import edu.utn.listenchat.R;
 import edu.utn.listenchat.db.MessageDao;
 import edu.utn.listenchat.handler.button.ButtonDownHandler;
@@ -40,7 +37,6 @@ import static edu.utn.listenchat.activity.Injector.injectDependencies;
 import static edu.utn.listenchat.activity.State.getState;
 import static edu.utn.listenchat.model.Message.createIncomingMessage;
 import static java.lang.String.format;
-import static java.util.Collections.singletonList;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -65,29 +61,6 @@ public class MainActivity extends ListeningActivity {
         injectDependencies(this);
 
         super.onCreate(savedInstanceState);
-
-        AccessToken accessToken = AccessToken.getCurrentAccessToken();
-
-        if (accessToken == null) {
-            Intent loginIntent = new Intent(this, LoginActivity.class);
-            startActivity(loginIntent);
-        } else {
-            LoginManager.getInstance().logInWithReadPermissions(this, singletonList("public_profile"));
-        }
-/* Ver como integrarlo en la app
-        GraphRequest graphRequest = GraphRequest.newMeRequest(accessToken, new GraphRequest.GraphJSONObjectCallback() {
-            @Override
-            public void onCompleted(JSONObject jsonObject, GraphResponse graphResponse) {
-                try {
-                    JSONArray jsonArrayFriends = jsonObject.getJSONObject("friendlist").getJSONArray("data");
-                    JSONObject friendlistObject = jsonArrayFriends.getJSONObject(0);
-                    String friendListID = friendlistObject.getString("id");
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        });*/
 
         setContentView(R.layout.activity_main);
 
