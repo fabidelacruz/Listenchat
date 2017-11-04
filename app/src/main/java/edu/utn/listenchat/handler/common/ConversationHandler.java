@@ -1,15 +1,11 @@
 package edu.utn.listenchat.handler.common;
 
 
-import android.util.Log;
-
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
 import java.util.List;
 
-import edu.utn.listenchat.activity.MainActivity;
 import edu.utn.listenchat.db.MessageDao;
 import edu.utn.listenchat.exception.ListenchatException;
 import edu.utn.listenchat.model.Message;
