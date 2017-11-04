@@ -149,7 +149,6 @@ public class MainActivity extends ListeningActivity {
         VoiceCommand voiceCommand = VoiceCommand.findCommand(receivedCommand);
         if (voiceCommand != null) {
             try {
-                Toast.makeText(this, "Comando interpretado: " + voiceCommand, Toast.LENGTH_LONG).show();
                 voiceCommand.execute(this.voiceCommandHandler, receivedCommand);
             } catch (IllegalStateException e) {
                 this.textToSpeechService.speak(e.getMessage());
