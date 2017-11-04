@@ -13,6 +13,7 @@ import edu.utn.listenchat.model.Message;
 import edu.utn.listenchat.model.MessageDirection;
 import edu.utn.listenchat.model.MessageStatus;
 import edu.utn.listenchat.service.PersistenceService;
+import edu.utn.listenchat.utils.CursorUtils;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static edu.utn.listenchat.utils.DateUtils.toDate;
@@ -24,23 +25,13 @@ public class MessageDao {
 
     private PersistenceService persistenceService;
 
-
     public List<Message> all() {
         Cursor cursor = this.persistenceService.getAllCursor();
         List<Message> messages = newArrayList();
 
         if (cursor.moveToFirst()) {
             do {
-                Message message = new Message();
-
-                message.setIntentId(cursor.getString(1));
-                message.setName(cursor.getString(2));
-                message.setMessage(cursor.getString(3));
-                message.setStatus(MessageStatus.valueOf(cursor.getString(4)));
-                message.setDate(toDate(cursor.getString(5)));
-                message.setDirection(MessageDirection.valueOf(cursor.getString(6)));
-
-                messages.add(message);
+                messages.add(CursorUtils.toMessage(cursor));
             } while(cursor.moveToNext());
         }
         return messages;
@@ -50,7 +41,7 @@ public class MessageDao {
         List<Message> allFromContact = newArrayList();
 
         for (Message message : this.all()) {
-            if (safeEquals(contact, message.getName())) {
+            if (safeEquals(contact, message.getContact())) {
                 allFromContact.add(message);
             }
         }

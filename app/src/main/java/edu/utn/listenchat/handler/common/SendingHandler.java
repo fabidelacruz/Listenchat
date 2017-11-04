@@ -47,7 +47,7 @@ public class SendingHandler {
             Toast.makeText(mainActivity, "Mensaje: " + text, Toast.LENGTH_LONG).show();
             this.messengerConnector.send(text, 0);
             Message message = createOutgoingMessage(getState().getCurrentContact(), text);
-            persistenceService.insert(mainActivity, message);
+            persistenceService.insert(message);
         }
         getState().setSendingMessageMode(FALSE);
     }

@@ -216,7 +216,7 @@ public class MainActivity extends ListeningActivity {
                 return;
             }
 
-            persistenceService.insert(context, message);
+            persistenceService.insert(message);
             if (list != null) {
                 reloadAdapter();
             }

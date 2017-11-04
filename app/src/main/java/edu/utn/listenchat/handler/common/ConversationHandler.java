@@ -59,7 +59,7 @@ public class ConversationHandler {
             getState().setCurrentMessagePosition(currentMessagePosition);
             Message message = dateMessages.get(currentMessagePosition);
             stringBuilder.append(this.prettyContact(message)).append(": ");
-            stringBuilder.append(message.getMessage()).append(". ");
+            stringBuilder.append(message.getText()).append(". ");
         } else {
             stringBuilder.append("No hay más mensajes siguientes del " + toPrettyString(getState().getCurrentMessageDate()));
         }
@@ -80,7 +80,7 @@ public class ConversationHandler {
             getState().setCurrentMessagePosition(currentMessagePosition);
             Message message = dateMessages.get(currentMessagePosition);
             stringBuilder.append(this.prettyContact(message)).append(": ");
-            stringBuilder.append(message.getMessage()).append(". ");
+            stringBuilder.append(message.getText()).append(". ");
         } else {
             stringBuilder.append("No hay más mensajes anteriores del " + toPrettyString(getState().getCurrentMessageDate()));
         }
@@ -96,7 +96,7 @@ public class ConversationHandler {
         if (currentMessagePosition >= 0) {
             Message message = dateMessages.get(currentMessagePosition);
             stringBuilder.append(this.prettyContact(message)).append(": ");
-            stringBuilder.append(message.getMessage()).append(". ");
+            stringBuilder.append(message.getText()).append(". ");
         } else {
             stringBuilder.append(toPrettyString(getState().getCurrentMessageDate()));
         }
@@ -138,7 +138,7 @@ public class ConversationHandler {
             case OUTGOING:
                 return "Yo";
             case INCOMING:
-                return newArrayList(split(message.getName(), " ")).get(0);
+                return newArrayList(split(message.getContact(), " ")).get(0);
             default:
                 throw new ListenchatException("Unexpected or null status message");
         }
