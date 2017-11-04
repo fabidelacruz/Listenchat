@@ -9,9 +9,11 @@ import com.google.common.collect.Multimap;
 import java.util.Collection;
 
 import edu.utn.listenchat.model.Message;
+import edu.utn.listenchat.model.MessageStatus;
 import edu.utn.listenchat.service.PersistenceService;
 import edu.utn.listenchat.service.TextToSpeechService;
 
+import static edu.utn.listenchat.model.MessageStatus.LISTENED;
 import static edu.utn.listenchat.utils.CursorUtils.messagesByContact;
 
 
@@ -53,11 +55,18 @@ public class NewsHandler {
                     stringBuilder.append(message.getText()).append(". ");
                 }
                 this.textToSpeechService.speak(stringBuilder.toString());
-                this.persistenceService.update(userMessages);
+                this.markMessagesAsListened(userMessages);
             }
         } else {
             textToSpeechService.speak("Usted no ha recibido ningún mensaje nuevo");
         }
+    }
+
+    private void markMessagesAsListened(Collection<Message> messages) {
+        for (Message message : messages) {
+            message.setStatus(LISTENED);
+        }
+        this.persistenceService.update(messages);
     }
 
     public void setPersistenceService(PersistenceService persistenceService) {
