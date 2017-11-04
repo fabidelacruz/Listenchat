@@ -15,7 +15,7 @@ public class CommandsHandler extends AbstractHandler {
 
     public void handleCommands() {
         this.stopListening();
-        this.textToSpeechService.speak("Comandos");
+        this.textToSpeechService.speak("Comandos disponible");
         this.textToSpeechService.speak(NOVELTIES.getText());
         this.textToSpeechService.speak(NEW_MESSAGES.getText());
         this.textToSpeechService.speak(CONVERSATION_WITH.getText());

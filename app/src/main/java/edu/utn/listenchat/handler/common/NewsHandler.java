@@ -74,7 +74,7 @@ public class NewsHandler extends AbstractHandler {
             textToSpeechService.speak(format("No hay mensajes para limpiar"));
         } else {
             this.updateStatus(messages, ARCHIVED);
-            textToSpeechService.speak(format("%s mensajes limpiados"));
+            textToSpeechService.speak(format("%s mensajes limpiados", messages.size()));
         }
     }
 
