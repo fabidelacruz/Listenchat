@@ -12,6 +12,7 @@ import edu.utn.listenchat.service.PersistenceService;
 import edu.utn.listenchat.service.TextToSpeechService;
 
 import static edu.utn.listenchat.activity.State.getState;
+import static edu.utn.listenchat.model.Message.createOutgoingMessage;
 import static edu.utn.listenchat.utils.StringUtils.safeEquals;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
@@ -45,7 +46,7 @@ public class SendingHandler {
         } else {
             Toast.makeText(mainActivity, "Mensaje: " + text, Toast.LENGTH_LONG).show();
             this.messengerConnector.send(text, 0);
-            Message message = Message.create(getState().getCurrentContact(), text, new Date(), "O");
+            Message message = createOutgoingMessage(getState().getCurrentContact(), text);
             persistenceService.insert(mainActivity, message);
         }
         getState().setSendingMessageMode(FALSE);

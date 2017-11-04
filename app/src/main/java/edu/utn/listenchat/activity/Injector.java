@@ -16,7 +16,7 @@ import edu.utn.listenchat.handler.common.NewsHandler;
 import edu.utn.listenchat.handler.common.SendingHandler;
 import edu.utn.listenchat.handler.voice.NotFoundHandler;
 import edu.utn.listenchat.handler.voice.VoiceCommandHandler;
-import edu.utn.listenchat.service.DummyLoader;
+import edu.utn.listenchat.service.InitialLoader;
 import edu.utn.listenchat.service.PersistenceService;
 import edu.utn.listenchat.service.TextToSpeechService;
 
@@ -33,8 +33,8 @@ public class Injector {
         TextToSpeechService textToSpeechService = new TextToSpeechService();
         textToSpeechService.setMainActivity(mainActivity);
 
-        DummyLoader dummyLoader = new DummyLoader();
-        dummyLoader.setPersistenceService(persistenceService);
+        InitialLoader initialLoader = new InitialLoader();
+        initialLoader.setPersistenceService(persistenceService);
 
         MessageDao messageDao = new MessageDao();
         messageDao.setPersistenceService(persistenceService);
@@ -104,7 +104,7 @@ public class Injector {
         mainActivity.setTextToSpeechService(textToSpeechService);
         mainActivity.setButtonDownHandler(buttonDownHandler);
         mainActivity.setButtonUpHandler(buttonUpHandler);
-        mainActivity.setDummyLoader(dummyLoader);
+        mainActivity.setInitialLoader(initialLoader);
         mainActivity.setLongPressHandler(longPressHandler);
         mainActivity.setMessageDao(messageDao);
         mainActivity.setSendingHandler(sendingHandler);

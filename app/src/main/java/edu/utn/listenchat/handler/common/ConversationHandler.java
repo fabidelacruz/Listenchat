@@ -11,6 +11,7 @@ import java.util.List;
 
 import edu.utn.listenchat.activity.MainActivity;
 import edu.utn.listenchat.db.MessageDao;
+import edu.utn.listenchat.exception.ListenchatException;
 import edu.utn.listenchat.model.Message;
 import edu.utn.listenchat.service.TextToSpeechService;
 
@@ -138,12 +139,12 @@ public class ConversationHandler {
 
     private String prettyContact(Message message) {
         switch (message.getDirection()) {
-            case "O":
+            case OUTGOING:
                 return "Yo";
-            case "I":
+            case INCOMING:
                 return newArrayList(split(message.getName(), " ")).get(0);
             default:
-                return "";
+                throw new ListenchatException("Unexpected or null status message");
         }
     }
 

@@ -19,8 +19,6 @@ import android.widget.Toast;
 import com.facebook.AccessToken;
 import com.facebook.login.LoginManager;
 
-import java.util.Date;
-
 import edu.utn.listenchat.R;
 import edu.utn.listenchat.db.MessageDao;
 import edu.utn.listenchat.handler.button.ButtonDownHandler;
@@ -31,7 +29,7 @@ import edu.utn.listenchat.handler.voice.NotFoundHandler;
 import edu.utn.listenchat.handler.voice.VoiceCommandHandler;
 import edu.utn.listenchat.model.Message;
 import edu.utn.listenchat.model.VoiceCommand;
-import edu.utn.listenchat.service.DummyLoader;
+import edu.utn.listenchat.service.InitialLoader;
 import edu.utn.listenchat.service.PersistenceService;
 import edu.utn.listenchat.service.TextToSpeechService;
 
@@ -40,6 +38,7 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.widget.Toast.LENGTH_LONG;
 import static edu.utn.listenchat.activity.Injector.injectDependencies;
 import static edu.utn.listenchat.activity.State.getState;
+import static edu.utn.listenchat.model.Message.createIncomingMessage;
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
@@ -50,7 +49,7 @@ public class MainActivity extends ListeningActivity {
     private TextToSpeechService textToSpeechService;
     private PersistenceService persistenceService;
     private MessageDao messageDao;
-    private DummyLoader dummyLoader;
+    private InitialLoader initialLoader;
     private SendingHandler sendingHandler;
     private VoiceCommandHandler voiceCommandHandler;
     private NotFoundHandler notFoundHandler;
@@ -99,7 +98,7 @@ public class MainActivity extends ListeningActivity {
 
         Context context = this.getApplicationContext();
         if (this.messageDao.all().size() == 0) {
-            this.dummyLoader.load();
+            this.initialLoader.load();
         }
 
         LocalBroadcastManager.getInstance(this).registerReceiver(onNotice, new IntentFilter("Listenchat-msg"));
@@ -210,7 +209,7 @@ public class MainActivity extends ListeningActivity {
                 return;
             }
 
-            Message message = Message.create(contact, text, new Date(), "I");
+            Message message = createIncomingMessage(contact, text);
 
             if (isDuplicated(message)) {
                 Log.i("CONTROL", format("Duplicated intentId %s", message.getIntentId()));
@@ -255,8 +254,8 @@ public class MainActivity extends ListeningActivity {
         this.messageDao = messageDao;
     }
 
-    public void setDummyLoader(DummyLoader dummyLoader) {
-        this.dummyLoader = dummyLoader;
+    public void setInitialLoader(InitialLoader initialLoader) {
+        this.initialLoader = initialLoader;
     }
 
     public void setSendingHandler(SendingHandler sendingHandler) {

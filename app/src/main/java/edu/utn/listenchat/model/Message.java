@@ -4,6 +4,10 @@ import java.util.Date;
 
 import edu.utn.listenchat.utils.StringUtils;
 
+import static edu.utn.listenchat.model.MessageDirection.INCOMING;
+import static edu.utn.listenchat.model.MessageDirection.OUTGOING;
+import static edu.utn.listenchat.model.MessageStatus.ARCHIVED;
+import static edu.utn.listenchat.model.MessageStatus.NEW;
 import static edu.utn.listenchat.utils.DateUtils.toStringUntilMinute;
 import static java.lang.String.format;
 
@@ -12,19 +16,34 @@ public class Message {
     private String intentId;
     private String name;
     private String message;
-    private String leido;
-    private Date receivedDate;
-    private String direction;
+    private MessageStatus status;
+    private Date date;
+    private MessageDirection direction;
 
-    public static Message create(String contact, String text, Date date, String direction) {
+    public static Message createIncomingMessage(String contact, String text) {
+        Message message = create(contact, text);
+        message.setDirection(INCOMING);
+        message.setStatus(NEW);
+
+        return message;
+    }
+
+    public static Message createOutgoingMessage(String contact, String text) {
+        Message message = create(contact, text);
+        message.setDirection(OUTGOING);
+        message.setStatus(ARCHIVED);
+
+        return message;
+    }
+
+    private static Message create(String contact, String text) {
         Message message = new Message();
 
+        Date date = new Date();
         message.setIntentId(format("%s-%s-%s", toStringUntilMinute(date), contact, text));
         message.setName(StringUtils.normalized(contact));
         message.setMessage(text);
-        message.setReceivedDate(date);
-        message.setLeido("N");
-        message.setDirection(direction);
+        message.setDate(date);
 
         return message;
     }
@@ -53,28 +72,29 @@ public class Message {
         this.message = message;
     }
 
-    public String getLeido() {
-        return leido;
+    public MessageStatus getStatus() {
+        return status;
     }
 
-    public void setLeido(String leido) {
-        this.leido = leido;
+    public void setStatus(MessageStatus status) {
+        this.status = status;
     }
 
-    public Date getReceivedDate() {
-        return receivedDate;
+    public Date getDate() {
+        return date;
     }
 
-    public void setReceivedDate(Date receivedDate) {
-        this.receivedDate = receivedDate;
+    public void setDate(Date date) {
+        this.date = date;
     }
 
-    public String getDirection() {
+    public MessageDirection getDirection() {
         return direction;
     }
 
-    public void setDirection(String direction) {
+    public void setDirection(MessageDirection direction) {
         this.direction = direction;
     }
+
 }
 

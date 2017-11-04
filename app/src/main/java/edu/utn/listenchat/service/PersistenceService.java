@@ -19,7 +19,7 @@ import edu.utn.listenchat.model.Message;
 import edu.utn.listenchat.utils.DateUtils;
 
 import static edu.utn.listenchat.db.MessageContract.MessageEntry.COLUMN_NAME_CONTACT;
-import static edu.utn.listenchat.db.MessageContract.MessageEntry.COLUMN_NAME_LEIDO;
+import static edu.utn.listenchat.db.MessageContract.MessageEntry.COLUMN_NAME_STATUS;
 import static edu.utn.listenchat.db.MessageContract.MessageEntry.TABLE_NAME;
 import static org.apache.commons.lang3.StringUtils.join;
 
@@ -28,14 +28,14 @@ public class PersistenceService {
 
     private MainActivity mainActivity;
 
-    public void insert(Context context, Message model) {
+    public void insert(Context context, Message message) {
         ContentValues values = new ContentValues();
-        values.put(MessageEntry.COLUMN_NAME_INTENT_ID, model.getIntentId());
-        values.put(MessageEntry.COLUMN_NAME_CONTACT, model.getName());
-        values.put(MessageEntry.COLUMN_NAME_CONTENT, model.getMessage());
-        values.put(MessageEntry.COLUMN_NAME_LEIDO, model.getLeido());
-        values.put(MessageEntry.COLUMN_NAME_DATE, DateUtils.toStringUntilSecond(model.getReceivedDate()));
-        values.put(MessageEntry.COLUMN_NAME_DIRECTION, model.getDirection());
+        values.put(MessageEntry.COLUMN_NAME_INTENT_ID, message.getIntentId());
+        values.put(MessageEntry.COLUMN_NAME_CONTACT, message.getName());
+        values.put(MessageEntry.COLUMN_NAME_CONTENT, message.getMessage());
+        values.put(MessageEntry.COLUMN_NAME_STATUS, message.getStatus().name());
+        values.put(MessageEntry.COLUMN_NAME_DATE, DateUtils.toStringUntilSecond(message.getDate()));
+        values.put(MessageEntry.COLUMN_NAME_DIRECTION, message.getDirection().name());
 
         SQLiteDatabase writableDatabase = new ListenchatDbHelper(context).getWritableDatabase();
         writableDatabase.insert(TABLE_NAME, null, values);
@@ -52,14 +52,8 @@ public class PersistenceService {
         return new ListenchatDbHelper(this.mainActivity).getWritableDatabase().rawQuery("SELECT * FROM " + TABLE_NAME, null);
     }
 
-    public void markNotified(List<Integer> integers) {
-        ContentValues cv = new ContentValues();
-        cv.put(COLUMN_NAME_LEIDO, "Y");
-        new ListenchatDbHelper(this.mainActivity).getWritableDatabase().update(TABLE_NAME, cv, "_id in (" + join(integers, ",") + ")", null);
-    }
-
     public Cursor getNewsCursor() {
-        return new ListenchatDbHelper(this.mainActivity).getWritableDatabase().rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE " + COLUMN_NAME_LEIDO + " = 'N'", null);
+        return new ListenchatDbHelper(this.mainActivity).getWritableDatabase().rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE " + COLUMN_NAME_STATUS + " <> 'ARCHIVED'", null);
     }
 
     public List<String> getContacts() {

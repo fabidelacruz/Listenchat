@@ -10,7 +10,7 @@ import static edu.utn.listenchat.db.MessageContract.MessageEntry.COLUMN_NAME_CON
 import static edu.utn.listenchat.db.MessageContract.MessageEntry.COLUMN_NAME_DATE;
 import static edu.utn.listenchat.db.MessageContract.MessageEntry.COLUMN_NAME_DIRECTION;
 import static edu.utn.listenchat.db.MessageContract.MessageEntry.COLUMN_NAME_INTENT_ID;
-import static edu.utn.listenchat.db.MessageContract.MessageEntry.COLUMN_NAME_LEIDO;
+import static edu.utn.listenchat.db.MessageContract.MessageEntry.COLUMN_NAME_STATUS;
 import static edu.utn.listenchat.db.MessageContract.MessageEntry.TABLE_NAME;
 
 public class ListenchatDbHelper extends SQLiteOpenHelper {
@@ -23,7 +23,7 @@ public class ListenchatDbHelper extends SQLiteOpenHelper {
             COLUMN_NAME_INTENT_ID + TEXT_TYPE + COMMA_SEP +
             COLUMN_NAME_CONTACT + TEXT_TYPE + COMMA_SEP +
             COLUMN_NAME_CONTENT + TEXT_TYPE + COMMA_SEP +
-            COLUMN_NAME_LEIDO + TEXT_TYPE + COMMA_SEP +
+            COLUMN_NAME_STATUS + TEXT_TYPE + COMMA_SEP +
             COLUMN_NAME_DATE + TEXT_TYPE + COMMA_SEP +
             COLUMN_NAME_DIRECTION + TEXT_TYPE + " )";
 

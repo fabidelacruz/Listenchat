@@ -12,7 +12,7 @@ public final class MessageContract {
         public static final String COLUMN_NAME_CONTACT = "contact";
         public static final String COLUMN_NAME_CONTENT = "content";
         public static final String COLUMN_NAME_DATE = "date";
-        public static final String COLUMN_NAME_LEIDO = "leido";
+        public static final String COLUMN_NAME_STATUS = "status";
         public static final String COLUMN_NAME_INTENT_ID = "intent_id";
         public static final String COLUMN_NAME_DIRECTION = "direction";
     }

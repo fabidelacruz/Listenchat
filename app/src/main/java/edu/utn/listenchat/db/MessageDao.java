@@ -10,6 +10,8 @@ import java.util.List;
 
 import edu.utn.listenchat.activity.MainActivity;
 import edu.utn.listenchat.model.Message;
+import edu.utn.listenchat.model.MessageDirection;
+import edu.utn.listenchat.model.MessageStatus;
 import edu.utn.listenchat.service.PersistenceService;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -34,9 +36,9 @@ public class MessageDao {
                 message.setIntentId(cursor.getString(1));
                 message.setName(cursor.getString(2));
                 message.setMessage(cursor.getString(3));
-                message.setLeido(cursor.getString(4));
-                message.setReceivedDate(toDate(cursor.getString(5)));
-                message.setDirection(cursor.getString(6));
+                message.setStatus(MessageStatus.valueOf(cursor.getString(4)));
+                message.setDate(toDate(cursor.getString(5)));
+                message.setDirection(MessageDirection.valueOf(cursor.getString(6)));
 
                 messages.add(message);
             } while(cursor.moveToNext());
@@ -60,7 +62,7 @@ public class MessageDao {
 
         List<Message> messages = this.allFromContact(contact);
         for (Message message : messages) {
-            messagesByDate.put(toStringUntilDay(message.getReceivedDate()), message);
+            messagesByDate.put(toStringUntilDay(message.getDate()), message);
         }
         return messagesByDate;
     }
