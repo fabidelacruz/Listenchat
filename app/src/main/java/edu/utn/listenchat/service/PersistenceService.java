@@ -68,6 +68,10 @@ public class PersistenceService {
         return new ListenchatDbHelper(this.mainActivity).getWritableDatabase().rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE " + COLUMN_NAME_STATUS + " <> 'ARCHIVED'", null);
     }
 
+    public Cursor getListenedCursor() {
+        return new ListenchatDbHelper(this.mainActivity).getWritableDatabase().rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE " + COLUMN_NAME_STATUS + " == 'LISTENED'", null);
+    }
+
     public List<String> getContacts() {
         List<String> contacts = Lists.newArrayList();
 

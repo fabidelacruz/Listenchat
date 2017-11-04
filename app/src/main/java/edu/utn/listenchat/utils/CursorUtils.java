@@ -12,6 +12,7 @@ import edu.utn.listenchat.model.Message;
 import edu.utn.listenchat.model.MessageDirection;
 import edu.utn.listenchat.model.MessageStatus;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static edu.utn.listenchat.model.MessageDirection.INCOMING;
 import static edu.utn.listenchat.utils.DateUtils.toDate;
 
@@ -35,7 +36,7 @@ public class CursorUtils {
     }
 
     public static List<Integer> messageIds(Cursor cursor) {
-        List<Integer> ids = Lists.newArrayList();
+        List<Integer> ids = newArrayList();
 
         if (cursor.moveToFirst()) {
             do {
@@ -57,6 +58,16 @@ public class CursorUtils {
         message.setDirection(MessageDirection.valueOf(cursor.getString(6)));
 
         return message;
+    }
+
+    public static List<Message> toMessages(Cursor cursor) {
+        List<Message> messages = newArrayList();
+        if (cursor.moveToFirst()) {
+            do {
+                messages.add(toMessage(cursor));
+            } while(cursor.moveToNext());
+        }
+        return messages;
     }
 
 }

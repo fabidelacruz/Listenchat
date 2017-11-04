@@ -7,14 +7,18 @@ import android.util.Log;
 import com.google.common.collect.Multimap;
 
 import java.util.Collection;
+import java.util.List;
 
 import edu.utn.listenchat.model.Message;
 import edu.utn.listenchat.model.MessageStatus;
 import edu.utn.listenchat.service.PersistenceService;
 import edu.utn.listenchat.service.TextToSpeechService;
+import edu.utn.listenchat.utils.CursorUtils;
 
+import static edu.utn.listenchat.model.MessageStatus.ARCHIVED;
 import static edu.utn.listenchat.model.MessageStatus.LISTENED;
 import static edu.utn.listenchat.utils.CursorUtils.messagesByContact;
+import static java.lang.String.format;
 
 
 public class NewsHandler {
@@ -55,16 +59,27 @@ public class NewsHandler {
                     stringBuilder.append(message.getText()).append(". ");
                 }
                 this.textToSpeechService.speak(stringBuilder.toString());
-                this.markMessagesAsListened(userMessages);
+                this.updateStatus(userMessages, LISTENED);
             }
         } else {
             textToSpeechService.speak("Usted no ha recibido ningún mensaje nuevo");
         }
     }
 
-    private void markMessagesAsListened(Collection<Message> messages) {
+    public void handleClear() {
+        Cursor cursor = this.persistenceService.getListenedCursor();
+        List<Message> messages = CursorUtils.toMessages(cursor);
+        if (messages.isEmpty()) {
+            textToSpeechService.speak(format("No hay mensajes para limpiar"));
+        } else {
+            this.updateStatus(messages, ARCHIVED);
+            textToSpeechService.speak(format("%s mensajes limpiados"));
+        }
+    }
+
+    private void updateStatus(Collection<Message> messages, MessageStatus status) {
         for (Message message : messages) {
-            message.setStatus(LISTENED);
+            message.setStatus(status);
         }
         this.persistenceService.update(messages);
     }
