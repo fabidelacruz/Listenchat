@@ -69,7 +69,6 @@ public class MainActivity extends ListeningActivity {
         reloadAdapter();
         checkPermissions();
 
-        Context context = this.getApplicationContext();
         if (this.messageDao.all().size() == 0) {
             this.initialLoader.load();
         }

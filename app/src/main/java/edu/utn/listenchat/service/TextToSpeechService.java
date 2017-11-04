@@ -86,10 +86,16 @@ public class TextToSpeechService {
             } 
  
             @Override 
-            public void onDone(String utteranceId) {
-                textToSpeechCallaback.onCompletion();
-            } 
-        }); 
+            public void onDone(String utteranceId){
+                mainActivity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        textToSpeechCallaback.onCompletion();
+                    }
+                });
+
+            }
+        });
         textToSpeech.speak(text, QUEUE_ADD, map);
     }
  
@@ -113,7 +119,12 @@ public class TextToSpeechService {
 
             @Override
             public void onDone(String utteranceId) {
-                textToSpeechCallaback.onCompletion();
+                mainActivity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        textToSpeechCallaback.onCompletion();
+                    }
+                });
             }
         });
     }
