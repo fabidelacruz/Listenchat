@@ -1,6 +1,8 @@
 package edu.utn.listenchat.activity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.support.v7.app.AppCompatActivity;
@@ -13,6 +15,8 @@ import edu.utn.listenchat.listener.VoiceRecognitionListener;
 import edu.utn.listenchat.service.IVoiceControl;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.media.AudioManager.ADJUST_MUTE;
+import static android.media.AudioManager.ADJUST_TOGGLE_MUTE;
 import static android.speech.RecognizerIntent.EXTRA_LANGUAGE;
 import static android.speech.RecognizerIntent.EXTRA_LANGUAGE_MODEL;
 import static android.speech.RecognizerIntent.LANGUAGE_MODEL_FREE_FORM;
@@ -47,10 +51,15 @@ public abstract class ListeningActivity extends AppCompatActivity implements IVo
             intent.putExtra(EXTRA_LANGUAGE, new Locale("es", "AR"));
             intent.putExtra(EXTRA_LANGUAGE_MODEL, LANGUAGE_MODEL_FREE_FORM);
             intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, this.getPackageName());
-            intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 5000);
+            intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 10000);
+            intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 15000);
             intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 15000);
             intent.putExtra("android.speech.extra.DICTATION_MODE", true);
+
+            AudioManager audioManager=(AudioManager)getSystemService(Context.AUDIO_SERVICE);
+            audioManager.adjustVolume(ADJUST_MUTE, 0);
             speechRecognizer.startListening(intent);
+
         } catch(Exception ex) {
             Log.e("SpeechRecognition", "Cannot start service", ex);
         }
