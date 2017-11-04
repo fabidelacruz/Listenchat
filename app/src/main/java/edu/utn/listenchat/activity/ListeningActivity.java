@@ -33,8 +33,8 @@ public abstract class ListeningActivity extends AppCompatActivity implements IVo
     // stops the service
     public void stopListening() {
         if (speechRecognizer != null) {
-            //speechRecognizer.stopListening();
-            //speechRecognizer.cancel();
+            speechRecognizer.stopListening();
+            speechRecognizer.cancel();
             speechRecognizer.destroy();
         }
         speechRecognizer = null;
@@ -44,9 +44,10 @@ public abstract class ListeningActivity extends AppCompatActivity implements IVo
         try {
             initSpeech();
             Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-            intent.putExtra(EXTRA_LANGUAGE, new Locale("es", "ES"));
+            intent.putExtra(EXTRA_LANGUAGE, new Locale("es", "AR"));
             intent.putExtra(EXTRA_LANGUAGE_MODEL, LANGUAGE_MODEL_FREE_FORM);
             intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, this.getPackageName());
+            intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 5000);
             intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 15000);
             speechRecognizer.startListening(intent);
         } catch(Exception ex) {

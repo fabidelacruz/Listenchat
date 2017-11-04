@@ -45,6 +45,7 @@ public class SendingHandler extends AbstractHandler {
             this.messengerConnector.send(text, 0);
             Message message = createOutgoingMessage(getState().getCurrentContact(), text);
             persistenceService.insert(message);
+            resumeListening();
         }
         getState().setSendingMessageMode(FALSE);
     }
