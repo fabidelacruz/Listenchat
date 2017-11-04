@@ -13,9 +13,10 @@ import static java.lang.String.format;
 
 public class Message {
 
+    private Long id;
     private String intentId;
-    private String name;
-    private String message;
+    private String contact;
+    private String text;
     private MessageStatus status;
     private Date date;
     private MessageDirection direction;
@@ -41,11 +42,20 @@ public class Message {
 
         Date date = new Date();
         message.setIntentId(format("%s-%s-%s", toStringUntilMinute(date), contact, text));
-        message.setName(StringUtils.normalized(contact));
-        message.setMessage(text);
+        message.setContact(StringUtils.normalized(contact));
+        message.setText(text);
         message.setDate(date);
 
         return message;
+    }
+
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getIntentId() {
@@ -56,20 +66,20 @@ public class Message {
         this.intentId = intentId;
     }
 
-    public String getName() {
-        return name;
+    public String getContact() {
+        return contact;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setContact(String contact) {
+        this.contact = contact;
     }
 
-    public String getMessage() {
-        return message;
+    public String getText() {
+        return text;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public void setText(String text) {
+        this.text = text;
     }
 
     public MessageStatus getStatus() {

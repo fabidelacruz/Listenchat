@@ -9,9 +9,12 @@ import com.google.common.collect.Multimap;
 import java.util.Collection;
 
 import edu.utn.listenchat.handler.AbstractHandler;
+import edu.utn.listenchat.model.Message;
+import edu.utn.listenchat.model.MessageStatus;
 import edu.utn.listenchat.service.PersistenceService;
 
-import static edu.utn.listenchat.utils.CursorUtils.convertCursorToMap;
+import static edu.utn.listenchat.model.MessageStatus.LISTENED;
+import static edu.utn.listenchat.utils.CursorUtils.messagesByContact;
 
 public class NewsHandler extends AbstractHandler {
 
@@ -21,12 +24,12 @@ public class NewsHandler extends AbstractHandler {
         stopListening();
         Cursor cursor = persistenceService.getNewsCursor();
 
-        Multimap<String, String> allMessages = convertCursorToMap(cursor);
+        Multimap<String, Message> allMessages = messagesByContact(cursor);
 
         if (allMessages.keySet().size() > 0) {
             for (String user : allMessages.keySet()) {
                 StringBuilder stringBuilder = new StringBuilder();
-                Collection<String> userMessages = allMessages.get(user);
+                Collection<Message> userMessages = allMessages.get(user);
                 stringBuilder.append(userMessages.size()).append(" mensajes recibidos de ").append(user).append(". ");
                 Log.i("MENSAJES", stringBuilder.toString());
                 textToSpeechService.speak(stringBuilder.toString());
@@ -41,18 +44,18 @@ public class NewsHandler extends AbstractHandler {
         stopListening();
         Cursor cursor = persistenceService.getNewsCursor();
 
-        Multimap<String, String> allMessages = convertCursorToMap(cursor);
+        Multimap<String, Message> allMessages = messagesByContact(cursor);
 
         if (allMessages.keySet().size() > 0) {
             for (String user : allMessages.keySet()) {
                 StringBuilder stringBuilder = new StringBuilder();
-                Collection<String> userMessages = allMessages.get(user);
+                Collection<Message> userMessages = allMessages.get(user);
                 stringBuilder.append("Mensajes recibidos de ").append(user).append(". ");
-                for (String message : userMessages) {
-                    stringBuilder.append(message).append(". ");
+                for (Message message : userMessages) {
+                    stringBuilder.append(message.getText()).append(". ");
                 }
-                Log.i("MENSAJES", stringBuilder.toString());
-                textToSpeechService.speak(stringBuilder.toString());
+                this.textToSpeechService.speak(stringBuilder.toString());
+                this.markMessagesAsListened(userMessages);
             }
             textToSpeechService.speak("", getResumeCallback());
         } else {
@@ -60,6 +63,12 @@ public class NewsHandler extends AbstractHandler {
         }
     }
 
+    private void markMessagesAsListened(Collection<Message> messages) {
+        for (Message message : messages) {
+            message.setStatus(LISTENED);
+        }
+        this.persistenceService.update(messages);
+    }
 
     public void setPersistenceService(PersistenceService persistenceService) {
         this.persistenceService = persistenceService;
