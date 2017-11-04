@@ -11,6 +11,7 @@ import android.widget.Toast;
 
 import java.util.Locale;
 
+import edu.utn.listenchat.listener.TextToSpeechCallaback;
 import edu.utn.listenchat.listener.VoiceRecognitionListener;
 import edu.utn.listenchat.service.IVoiceControl;
 
@@ -22,7 +23,7 @@ import static android.speech.RecognizerIntent.EXTRA_LANGUAGE_MODEL;
 import static android.speech.RecognizerIntent.LANGUAGE_MODEL_FREE_FORM;
 import static android.widget.Toast.LENGTH_LONG;
 
-public abstract class ListeningActivity extends AppCompatActivity implements IVoiceControl {
+public abstract class ListeningActivity extends AppCompatActivity implements IVoiceControl, TextToSpeechCallaback {
 
     protected static final int PERMISSION_REQUEST = 9999;
 
@@ -56,8 +57,6 @@ public abstract class ListeningActivity extends AppCompatActivity implements IVo
             intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 15000);
             intent.putExtra("android.speech.extra.DICTATION_MODE", true);
 
-            AudioManager audioManager=(AudioManager)getSystemService(Context.AUDIO_SERVICE);
-            audioManager.adjustVolume(ADJUST_MUTE, 0);
             speechRecognizer.startListening(intent);
 
         } catch(Exception ex) {
@@ -139,5 +138,15 @@ public abstract class ListeningActivity extends AppCompatActivity implements IVo
             }
 
         }
+    }
+
+    @Override
+    public void onCompletion() {
+        resumeListener();
+    }
+
+    @Override
+    public void onErrorOccured(int errorCode) {
+        resumeListener();
     }
 }

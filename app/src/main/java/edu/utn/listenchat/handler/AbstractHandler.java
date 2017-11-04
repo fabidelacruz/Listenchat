@@ -21,17 +21,7 @@ public abstract class AbstractHandler {
 
     @NonNull
     protected TextToSpeechCallaback getResumeCallback() {
-        return new TextToSpeechCallaback() {
-            @Override
-            public void onCompletion() {
-                resumeListening();
-            }
-
-            @Override
-            public void onErrorOccured(int errorCode) {
-                resumeListening();
-            }
-        };
+        return activity;
     }
 
     public void setActivity(ListeningActivity activity) {

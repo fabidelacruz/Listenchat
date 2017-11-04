@@ -134,15 +134,17 @@ public class MainActivity extends ListeningActivity {
     @Override
     public void processVoiceCommands(String... voiceCommands) {
         String receivedCommand = this.findReceivedCommand(voiceCommands);
-
+        stopListening();
         if (isNotBlank(receivedCommand)) {
             if (getState().isSendingMessageMode()) {
                 this.sendingHandler.sendMessage(receivedCommand);
             } else {
                 processCommand(receivedCommand);
             }
+        } else {
+            resumeListener();
         }
-        this.restartListeningService();
+        //this.restartListeningService();
     }
 
     private void processCommand(String receivedCommand) {
