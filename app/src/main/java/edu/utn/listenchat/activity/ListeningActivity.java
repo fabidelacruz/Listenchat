@@ -24,12 +24,22 @@ public abstract class ListeningActivity extends AppCompatActivity implements IVo
 
     protected SpeechRecognizer speechRecognizer;
 
-    protected void resumeListener() {
+    // starts the service
+    public void resumeListener() {
         VoiceRecognitionListener.getInstance().setListener(this); // Here we set the current listener
         startListening(); // starts listening*/
     }
 
-    // starts the service
+    // stops the service
+    public void stopListening() {
+        if (speechRecognizer != null) {
+            //speechRecognizer.stopListening();
+            //speechRecognizer.cancel();
+            speechRecognizer.destroy();
+        }
+        speechRecognizer = null;
+    }
+
     private void startListening() {
         try {
             initSpeech();
@@ -42,16 +52,6 @@ public abstract class ListeningActivity extends AppCompatActivity implements IVo
         } catch(Exception ex) {
             Log.e("SpeechRecognition", "Cannot start service", ex);
         }
-    }
- 
-    // stops the service
-    protected void stopListening() {
-        if (speechRecognizer != null) {
-            //speechRecognizer.stopListening();
-            //speechRecognizer.cancel();
-            speechRecognizer.destroy();
-        }
-        speechRecognizer = null;
     }
  
     protected void initSpeech() {

@@ -16,16 +16,19 @@ import edu.utn.listenchat.activity.MainActivity;
 import edu.utn.listenchat.listener.TextToSpeechCallaback;
 
 import static android.content.ContentValues.TAG;
+import static android.os.Build.VERSION_CODES.LOLLIPOP;
+import static android.speech.tts.TextToSpeech.QUEUE_ADD;
 
 public class TextToSpeechService {
 
     private MainActivity mainActivity;
     private TextToSpeech textToSpeech;
+
     private boolean started = false;
-    private List<Object[]> queue = new ArrayList<>();
 
     synchronized public void speak(final String message) {
         final TextToSpeechCallaback conversionCallback = this.buildStartCallback();
+        
         if (textToSpeech != null) {
             speak(message, conversionCallback);
         } else {
@@ -48,20 +51,16 @@ public class TextToSpeechService {
     }
 
     private void speak(String message, TextToSpeechCallaback conversionCallback) {
-        queue.add(new Object[] {message, conversionCallback});
-
         if (started) {
-            while (!queue.isEmpty()) {
-                Object[] array = queue.remove(0);
-                String key = (String) array[0];
-                TextToSpeechCallaback callback = (TextToSpeechCallaback) array[1];
+            this.mainActivity.stopListening();
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    ttsGreater21(message, conversionCallback);
-                } else {
-                    ttsUnder20(message, conversionCallback);
-                }
+            if (Build.VERSION.SDK_INT >= LOLLIPOP) {
+                ttsGreater21(message, conversionCallback);
+            } else {
+                ttsUnder20(message, conversionCallback);
             }
+
+            this.mainActivity.resumeListener();
         }
     }
 
@@ -95,24 +94,21 @@ public class TextToSpeechService {
  
             @Override 
             public void onDone(String utteranceId) {
-                //do some work here 
-
                 textToSpeechCallaback.onCompletion();
             } 
         }); 
-        textToSpeech.speak(text, TextToSpeech.QUEUE_ADD, map);
+        textToSpeech.speak(text, QUEUE_ADD, map);
     }
  
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    @TargetApi(LOLLIPOP)
     private void ttsGreater21(String text, TextToSpeechCallaback textToSpeechCallaback) {
         String utteranceId = text.hashCode() + "";
-        textToSpeech.speak(text, TextToSpeech.QUEUE_ADD, null, utteranceId);
+        textToSpeech.speak(text, QUEUE_ADD, null, utteranceId);
         textToSpeechCallaback.onCompletion();
     }
 
     public void stop() {
         textToSpeech.stop();
-        queue.clear();
     }
 
     private TextToSpeechCallaback buildStartCallback() {
