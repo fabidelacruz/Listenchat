@@ -8,13 +8,10 @@ import com.google.common.collect.MultimapBuilder;
 import java.util.List;
 
 import edu.utn.listenchat.model.Message;
-import edu.utn.listenchat.model.MessageDirection;
-import edu.utn.listenchat.model.MessageStatus;
 import edu.utn.listenchat.service.PersistenceService;
 import edu.utn.listenchat.utils.CursorUtils;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static edu.utn.listenchat.utils.DateUtils.toDate;
 import static edu.utn.listenchat.utils.DateUtils.toStringUntilDay;
 import static edu.utn.listenchat.utils.StringUtils.safeEquals;
 

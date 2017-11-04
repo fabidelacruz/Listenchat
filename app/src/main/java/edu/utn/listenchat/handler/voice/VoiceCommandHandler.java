@@ -25,6 +25,10 @@ public class VoiceCommandHandler {
         this.conversationHandler.again();
     }
 
+    public void handleClear() {
+        this.newsHandler.handleClear();
+    }
+
     public void handleCommands() {
         this.commandsHandler.handleCommands();
     }

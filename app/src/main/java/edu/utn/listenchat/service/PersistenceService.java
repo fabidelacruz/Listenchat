@@ -1,7 +1,6 @@
 package edu.utn.listenchat.service;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
@@ -66,6 +65,10 @@ public class PersistenceService {
 
     public Cursor getNewsCursor() {
         return new ListenchatDbHelper(this.mainActivity).getWritableDatabase().rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE " + COLUMN_NAME_STATUS + " <> 'ARCHIVED'", null);
+    }
+
+    public Cursor getListenedCursor() {
+        return new ListenchatDbHelper(this.mainActivity).getWritableDatabase().rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE " + COLUMN_NAME_STATUS + " == 'LISTENED'", null);
     }
 
     public List<String> getContacts() {

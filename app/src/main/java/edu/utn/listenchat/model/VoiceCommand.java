@@ -17,6 +17,13 @@ public enum VoiceCommand {
         }
     },
 
+    CLEAR(TRUE, "limpiar") {
+        @Override
+        public void execute(VoiceCommandHandler voiceCommandHandler, String receivedCommand) {
+            voiceCommandHandler.handleClear();
+        }
+    },
+
     COMMANDS(TRUE, "comandos") {
         @Override
         public void execute(VoiceCommandHandler voiceCommandHandler, String receivedCommand) {
