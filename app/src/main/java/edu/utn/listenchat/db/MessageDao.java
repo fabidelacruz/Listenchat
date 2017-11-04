@@ -1,6 +1,5 @@
 package edu.utn.listenchat.db;
 
-import android.content.Context;
 import android.database.Cursor;
 
 import com.google.common.collect.Multimap;
@@ -8,7 +7,6 @@ import com.google.common.collect.MultimapBuilder;
 
 import java.util.List;
 
-import edu.utn.listenchat.activity.MainActivity;
 import edu.utn.listenchat.model.Message;
 import edu.utn.listenchat.model.MessageDirection;
 import edu.utn.listenchat.model.MessageStatus;

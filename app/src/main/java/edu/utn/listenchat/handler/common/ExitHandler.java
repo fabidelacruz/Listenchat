@@ -1,16 +1,11 @@
 package edu.utn.listenchat.handler.common;
 
-import edu.utn.listenchat.activity.MainActivity;
+import edu.utn.listenchat.handler.AbstractHandler;
 
-public class ExitHandler {
-
-    private MainActivity activity;
+public class ExitHandler extends AbstractHandler {
 
     public void handleExit() {
         activity.finish();
     }
 
-    public void setActivity(MainActivity activity) {
-        this.activity = activity;
-    }
 }

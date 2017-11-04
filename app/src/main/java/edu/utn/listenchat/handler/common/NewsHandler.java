@@ -8,20 +8,17 @@ import com.google.common.collect.Multimap;
 
 import java.util.Collection;
 
-import edu.utn.listenchat.activity.MainActivity;
+import edu.utn.listenchat.handler.AbstractHandler;
 import edu.utn.listenchat.service.PersistenceService;
-import edu.utn.listenchat.service.TextToSpeechService;
 
 import static edu.utn.listenchat.utils.CursorUtils.convertCursorToMap;
 
-
-public class NewsHandler {
+public class NewsHandler extends AbstractHandler {
 
     private PersistenceService persistenceService;
-    private TextToSpeechService textToSpeechService;
-
 
     public void sayNovelties() {
+        stopListening();
         Cursor cursor = persistenceService.getNewsCursor();
 
         Multimap<String, String> allMessages = convertCursorToMap(cursor);
@@ -34,12 +31,14 @@ public class NewsHandler {
                 Log.i("MENSAJES", stringBuilder.toString());
                 textToSpeechService.speak(stringBuilder.toString());
             }
+            textToSpeechService.speak("", getResumeCallback());
         } else {
-            textToSpeechService.speak("Usted no ha recibido ningún mensaje nuevo");
+            textToSpeechService.speak("Usted no ha recibido ningún mensaje nuevo", getResumeCallback());
         }
     }
 
     public void sayNewMessages() {
+        stopListening();
         Cursor cursor = persistenceService.getNewsCursor();
 
         Multimap<String, String> allMessages = convertCursorToMap(cursor);
@@ -55,18 +54,15 @@ public class NewsHandler {
                 Log.i("MENSAJES", stringBuilder.toString());
                 textToSpeechService.speak(stringBuilder.toString());
             }
+            textToSpeechService.speak("", getResumeCallback());
         } else {
-            textToSpeechService.speak("Usted no ha recibido ningún mensaje nuevo");
+            textToSpeechService.speak("Usted no ha recibido ningún mensaje nuevo", getResumeCallback());
         }
     }
 
 
     public void setPersistenceService(PersistenceService persistenceService) {
         this.persistenceService = persistenceService;
-    }
-
-    public void setTextToSpeechService(TextToSpeechService textToSpeechService) {
-        this.textToSpeechService = textToSpeechService;
     }
 
 }

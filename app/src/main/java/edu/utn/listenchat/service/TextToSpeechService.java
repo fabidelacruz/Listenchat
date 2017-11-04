@@ -1,15 +1,12 @@
 package edu.utn.listenchat.service;
 
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.os.Build;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.util.Log;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 
 import edu.utn.listenchat.activity.MainActivity;
@@ -28,7 +25,7 @@ public class TextToSpeechService {
 
     synchronized public void speak(final String message) {
         final TextToSpeechCallaback conversionCallback = this.buildStartCallback();
-        
+
         if (textToSpeech != null) {
             speak(message, conversionCallback);
         } else {
@@ -36,8 +33,8 @@ public class TextToSpeechService {
                 @Override
                 public void onInit(int status) {
                     if (status != TextToSpeech.ERROR) {
-                        textToSpeech.setLanguage(new Locale("es", "ES"));
-                        textToSpeech.setPitch(1.1f);
+                        textToSpeech.setLanguage(new Locale("es", "AR"));
+                        textToSpeech.setPitch(1f);
                         textToSpeech.setSpeechRate(1f);
 
                         started = true;
@@ -50,17 +47,13 @@ public class TextToSpeechService {
         }
     }
 
-    private void speak(String message, TextToSpeechCallaback conversionCallback) {
+    public void speak(String message, TextToSpeechCallaback conversionCallback) {
         if (started) {
-            this.mainActivity.stopListening();
-
             if (Build.VERSION.SDK_INT >= LOLLIPOP) {
                 ttsGreater21(message, conversionCallback);
             } else {
                 ttsUnder20(message, conversionCallback);
             }
-
-            this.mainActivity.resumeListener();
         }
     }
 

@@ -58,13 +58,6 @@ public class ButtonOkHandler {
                         step.setStep(CONVERSATION);
                         this.textToSpeechService.speak(SELECT_CONTACT.getDescription());
                         break;
-/*
-                    case SEND_MESSAGE:
-                        step.setSubstep(SELECT_CONTACT);
-                        step.setStep(MESSAGE);
-                        this.textToSpeechService.speak(SELECT_CONTACT.getDescription());
-                        break;
-*/
                     case HELP:
                         helpHandler.handleHelp();
                         State.getState().setMenuStep(null);

@@ -4,11 +4,8 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.text.format.DateFormat;
 
 import com.google.common.collect.Lists;
-
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 
@@ -21,7 +18,6 @@ import edu.utn.listenchat.utils.DateUtils;
 import static edu.utn.listenchat.db.MessageContract.MessageEntry.COLUMN_NAME_CONTACT;
 import static edu.utn.listenchat.db.MessageContract.MessageEntry.COLUMN_NAME_STATUS;
 import static edu.utn.listenchat.db.MessageContract.MessageEntry.TABLE_NAME;
-import static org.apache.commons.lang3.StringUtils.join;
 
 
 public class PersistenceService {
