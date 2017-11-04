@@ -49,6 +49,7 @@ public abstract class ListeningActivity extends AppCompatActivity implements IVo
             intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, this.getPackageName());
             intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 5000);
             intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 15000);
+            intent.putExtra("android.speech.extra.DICTATION_MODE", true);
             speechRecognizer.startListening(intent);
         } catch(Exception ex) {
             Log.e("SpeechRecognition", "Cannot start service", ex);
