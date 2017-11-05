@@ -1,6 +1,8 @@
 package edu.utn.listenchat.activity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.support.v7.app.AppCompatActivity;
@@ -9,16 +11,19 @@ import android.widget.Toast;
 
 import java.util.Locale;
 
+import edu.utn.listenchat.listener.TextToSpeechCallaback;
 import edu.utn.listenchat.listener.VoiceRecognitionListener;
 import edu.utn.listenchat.service.IVoiceControl;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.media.AudioManager.ADJUST_MUTE;
+import static android.media.AudioManager.ADJUST_TOGGLE_MUTE;
 import static android.speech.RecognizerIntent.EXTRA_LANGUAGE;
 import static android.speech.RecognizerIntent.EXTRA_LANGUAGE_MODEL;
 import static android.speech.RecognizerIntent.LANGUAGE_MODEL_FREE_FORM;
 import static android.widget.Toast.LENGTH_LONG;
 
-public abstract class ListeningActivity extends AppCompatActivity implements IVoiceControl {
+public abstract class ListeningActivity extends AppCompatActivity implements IVoiceControl, TextToSpeechCallaback {
 
     protected static final int PERMISSION_REQUEST = 9999;
 
@@ -47,10 +52,13 @@ public abstract class ListeningActivity extends AppCompatActivity implements IVo
             intent.putExtra(EXTRA_LANGUAGE, new Locale("es", "AR"));
             intent.putExtra(EXTRA_LANGUAGE_MODEL, LANGUAGE_MODEL_FREE_FORM);
             intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, this.getPackageName());
-            intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 5000);
+            intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 10000);
+            intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 15000);
             intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 15000);
             intent.putExtra("android.speech.extra.DICTATION_MODE", true);
+
             speechRecognizer.startListening(intent);
+
         } catch(Exception ex) {
             Log.e("SpeechRecognition", "Cannot start service", ex);
         }
@@ -130,5 +138,15 @@ public abstract class ListeningActivity extends AppCompatActivity implements IVo
             }
 
         }
+    }
+
+    @Override
+    public void onCompletion() {
+        resumeListener();
+    }
+
+    @Override
+    public void onErrorOccured(int errorCode) {
+        resumeListener();
     }
 }

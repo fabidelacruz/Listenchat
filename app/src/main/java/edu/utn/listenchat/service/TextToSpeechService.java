@@ -86,18 +86,47 @@ public class TextToSpeechService {
             } 
  
             @Override 
-            public void onDone(String utteranceId) {
-                textToSpeechCallaback.onCompletion();
-            } 
-        }); 
+            public void onDone(String utteranceId){
+                mainActivity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        textToSpeechCallaback.onCompletion();
+                    }
+                });
+
+            }
+        });
         textToSpeech.speak(text, QUEUE_ADD, map);
     }
  
     @TargetApi(LOLLIPOP)
-    private void ttsGreater21(String text, TextToSpeechCallaback textToSpeechCallaback) {
+    private void ttsGreater21(String text, final TextToSpeechCallaback textToSpeechCallaback) {
         String utteranceId = text.hashCode() + "";
         textToSpeech.speak(text, QUEUE_ADD, null, utteranceId);
-        textToSpeechCallaback.onCompletion();
+        textToSpeech.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+
+            @Override
+            public void onStart(String utteranceId) {
+                // TODO Auto-generated method stub
+
+            }
+
+            @Override
+            public void onError(String utteranceId) {
+                // TODO Auto-generated method stub
+                Log.e(TAG, "onError: ", null);
+            }
+
+            @Override
+            public void onDone(String utteranceId) {
+                mainActivity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        textToSpeechCallaback.onCompletion();
+                    }
+                });
+            }
+        });
     }
 
     public void stop() {
