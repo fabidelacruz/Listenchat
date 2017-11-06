@@ -91,6 +91,7 @@ public class Injector {
         buttonOkHandler.setCommandsHandler(commandsHandler);
         buttonOkHandler.setNewsHandler(newsHandler);
         buttonOkHandler.setExplainHandler(explainHandler);
+        buttonOkHandler.setSendingHandler(sendingHandler);
 
         ButtonUpHandler buttonUpHandler = new ButtonUpHandler();
         buttonUpHandler.setMainActivity(mainActivity);

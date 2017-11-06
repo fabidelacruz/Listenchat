@@ -11,7 +11,8 @@ public enum Step {
     CONVERSATION("Conversaciòn"),
     MESSAGE("enviar mensaje"),
     NOVELTIES("Novedades"),
-    EXPLAIN("Explicar comando");
+    EXPLAIN("Explicar comando"),
+    SEND_MESSAGE("Enviar mensaje");
 
     Step(String description) {
         this.description = description;

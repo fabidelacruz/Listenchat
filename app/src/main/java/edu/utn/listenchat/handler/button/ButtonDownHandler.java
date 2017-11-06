@@ -25,6 +25,7 @@ import static android.view.KeyEvent.KEYCODE_VOLUME_UP;
 import static edu.utn.listenchat.activity.State.getState;
 import static edu.utn.listenchat.model.Step.CONVERSATION;
 import static edu.utn.listenchat.model.Step.EXPLAIN;
+import static edu.utn.listenchat.model.Step.SEND_MESSAGE;
 import static edu.utn.listenchat.model.Substep.SELECT_COMMAND;
 import static edu.utn.listenchat.model.Substep.SELECT_CONTACT;
 import static java.lang.Boolean.TRUE;
@@ -173,6 +174,14 @@ public class ButtonDownHandler {
 
             return true;
         }
+
+        if (SEND_MESSAGE.equals(step.getStep())) {
+            if (SELECT_CONTACT.equals(step.getSubstep())) {
+                nextContact();
+            }
+            return true;
+        }
+
 
         if (EXPLAIN.equals(step.getStep())) {
             if (SELECT_COMMAND.equals(step.getSubstep())) {

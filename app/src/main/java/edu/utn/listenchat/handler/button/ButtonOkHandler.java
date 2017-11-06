@@ -7,6 +7,7 @@ import edu.utn.listenchat.handler.common.ExitHandler;
 import edu.utn.listenchat.handler.common.ExplainHandler;
 import edu.utn.listenchat.handler.common.HelpHandler;
 import edu.utn.listenchat.handler.common.NewsHandler;
+import edu.utn.listenchat.handler.common.SendingHandler;
 import edu.utn.listenchat.model.MenuStep;
 import edu.utn.listenchat.model.Step;
 import edu.utn.listenchat.model.Substep;
@@ -17,6 +18,7 @@ import static edu.utn.listenchat.model.Step.EXPLAIN;
 import static edu.utn.listenchat.model.Step.MESSAGE;
 import static edu.utn.listenchat.model.Substep.SELECT_COMMAND;
 import static edu.utn.listenchat.model.Substep.SELECT_CONTACT;
+import static edu.utn.listenchat.model.Substep.SEND_MESSAGE;
 
 
 public class ButtonOkHandler {
@@ -28,6 +30,7 @@ public class ButtonOkHandler {
     private HelpHandler helpHandler;
     private ExitHandler exitHandler;
     private ExplainHandler explainHandler;
+    private SendingHandler sendingHandler;
 
     public boolean handle() {
         textToSpeechService.stop();
@@ -72,6 +75,12 @@ public class ButtonOkHandler {
                         exitHandler.handleExit();
                         break;
 
+                    case SEND_MESSAGE:
+                        step.setSubstep(SELECT_CONTACT);
+                        step.setStep(Step.SEND_MESSAGE);
+                        this.textToSpeechService.speak(SELECT_CONTACT.getDescription());
+                        break;
+
                     case EXPLAIN:
                         step.setStep(EXPLAIN);
                         step.setSubstep(SELECT_COMMAND);
@@ -82,10 +91,18 @@ public class ButtonOkHandler {
                     && step.getContact() != null) {
                 step.setSubstep(Substep.READ);
                 this.conversationHandler.prepareConversation(step.getContact());
+
+
+            } else if (Step.SEND_MESSAGE.equals(step.getStep()) && SELECT_CONTACT.equals(step.getSubstep())
+                    && step.getContact() != null) {
+                step.setSubstep(Substep.READ);
+                this.sendingHandler.prepareMessage(step.getContact());
+
             } else if (MESSAGE.equals(step.getStep()) && SELECT_CONTACT.equals(step.getSubstep())
                     && step.getContact() != null) {
                 step.setSubstep(Substep.READ);
                 this.conversationHandler.prepareConversation(step.getContact());
+
             }  else if (EXPLAIN.equals(step.getStep()) && SELECT_COMMAND.equals(step.getSubstep())
                     && State.getState().getExplainedCommand() != null) {
                 this.explainHandler.handleHelp(State.getState().getExplainedCommand().getText());
@@ -124,5 +141,9 @@ public class ButtonOkHandler {
 
     public void setExplainHandler(ExplainHandler explainHandler) {
         this.explainHandler = explainHandler;
+    }
+
+    public void setSendingHandler(SendingHandler sendingHandler) {
+        this.sendingHandler = sendingHandler;
     }
 }
