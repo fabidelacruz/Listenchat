@@ -52,9 +52,9 @@ public class ExplainHandler extends AbstractHandler {
                         "Para saltar de día de conversación dicte los comandos. Día siguiente. y. Día anterior");
                 break;
             case SEND_MESSAGE:
-                this.say(SEND_MESSAGE, ". Seguido del nombre del contacto. Permite enviar un mensaje " +
-                        "de voz para un contacto. Luego del dictado, se abrirá la aplicación de " +
-                        "messenger esperando que el usuario confirme el envío.");
+                this.say(SEND_MESSAGE, ". Seguido del nombre del contacto. Permite enviar un " +
+                        "mensaje. Luego del dictado, se abrirá la lista de contactos de messenger" +
+                        "para enviar el mensaje.");
                 break;
             case COMMANDS:
                 this.say(COMMANDS, "Lista el conjunto de comandos con los que cuenta el usuario");
