@@ -68,6 +68,7 @@ public class NewsHandler extends AbstractHandler {
     }
 
     public void handleClear() {
+        stopListening();
         Cursor cursor = this.persistenceService.getListenedCursor();
         List<Message> messages = CursorUtils.toMessages(cursor);
         if (messages.isEmpty()) {
@@ -76,6 +77,7 @@ public class NewsHandler extends AbstractHandler {
             this.updateStatus(messages, ARCHIVED);
             textToSpeechService.speak(format("%s mensajes limpiados", messages.size()));
         }
+        textToSpeechService.speak("", getResumeCallback());
     }
 
     private void updateStatus(Collection<Message> messages, MessageStatus status) {

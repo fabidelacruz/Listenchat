@@ -9,6 +9,7 @@ public enum Substep {
     MESSAGES("Mensajes nuevos", Step.MAIN),
     SEND_MESSAGE("Enviar mensaje", Step.MAIN),
     NOVELTIES("Novedades", Step.MAIN),
+    CLEAR("Limpiar", Step.MAIN),
     CONVERSATION("Conversación", Step.MAIN),
     COMMANDS("Comandos", Step.MAIN),
     HELP("Ayuda", Step.MAIN),

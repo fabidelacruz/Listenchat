@@ -12,6 +12,7 @@ import static edu.utn.listenchat.model.VoiceCommand.CLEAR;
 import static edu.utn.listenchat.model.VoiceCommand.COMMANDS;
 import static edu.utn.listenchat.model.VoiceCommand.CONVERSATION_WITH;
 import static edu.utn.listenchat.model.VoiceCommand.EXIT;
+import static edu.utn.listenchat.model.VoiceCommand.EXPLAIN;
 import static edu.utn.listenchat.model.VoiceCommand.HELP;
 import static edu.utn.listenchat.model.VoiceCommand.NEW_MESSAGES;
 import static edu.utn.listenchat.model.VoiceCommand.NOVELTIES;
@@ -47,7 +48,7 @@ public class ExplainHandler extends AbstractHandler {
                         "todos los mensajes enviados y recibidos con este contacto, ordenados " +
                         "cronológicamente. Se comienza a recorrer desde el primer mensaje del " +
                         "último día de conversación. Para recorrer los mensajes del mismo día dicte " +
-                        "los comandos. Siguiente. y. Anterior. Para repetir el mensaje diga. De nuevo." +
+                        "los comandos. Siguiente. y. Anterior. Para repetir el mensaje diga. De nuevo. " +
                         "Para saltar de día de conversación dicte los comandos. Día siguiente. y. Día anterior");
                 break;
             case SEND_MESSAGE:

@@ -56,6 +56,11 @@ public class ButtonOkHandler {
                         State.getState().setMenuStep(null);
                         break;
 
+                    case CLEAR:
+                        this.newsHandler.handleClear();
+                        State.getState().setMenuStep(null);
+                        break;
+
                     case CONVERSATION:
                         step.setSubstep(SELECT_CONTACT);
                         step.setStep(CONVERSATION);

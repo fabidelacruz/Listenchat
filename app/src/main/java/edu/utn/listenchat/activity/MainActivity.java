@@ -152,7 +152,7 @@ public class MainActivity extends ListeningActivity {
             try {
                 voiceCommand.execute(this.voiceCommandHandler, receivedCommand);
             } catch (IllegalStateException e) {
-                this.textToSpeechService.speak(e.getMessage());
+                this.textToSpeechService.speak(e.getMessage(), this);
             }
         } else {
             this.notFoundHandler.sayMessage();

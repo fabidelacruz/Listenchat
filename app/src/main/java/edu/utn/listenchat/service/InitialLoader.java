@@ -16,23 +16,10 @@ public class InitialLoader {
     public void load() {
         List<Message> messages = Lists.newArrayList();
 
-        messages.add(this.incomingMessage("Fabián Cardaci", "Hola 1", "2017-09-05T00:11:22"));
-        messages.add(this.incomingMessage("Fabián Cardaci", "Hola 2", "2017-09-05T00:11:22"));
-        messages.add(this.incomingMessage("Fabián Cardaci", "Hola 3", "2017-09-05T00:11:22"));
-
-        messages.add(this.incomingMessage("Fabián Cardaci", "Hola 11", "2017-09-06T00:11:22"));
-        messages.add(this.incomingMessage("Fabián Cardaci", "Hola 12", "2017-09-06T00:11:22"));
-        messages.add(this.incomingMessage("Fabián Cardaci", "Hola 13", "2017-09-06T00:11:22"));
-
-        messages.add(this.incomingMessage("Fabi De La Cruz", "Chau 1", "2017-09-05T00:11:22"));
-        messages.add(this.incomingMessage("Fabi De La Cruz", "Chau 2", "2017-09-05T00:11:22"));
-        messages.add(this.incomingMessage("Fabi De La Cruz", "Chau 3", "2017-09-05T00:11:22"));
-
-        messages.add(this.incomingMessage("Fabi De La Cruz", "Chau 11", "2017-09-06T00:11:22"));
-        messages.add(this.incomingMessage("Fabi De La Cruz", "Chau 12", "2017-09-06T00:11:22"));
-        messages.add(this.incomingMessage("Fabi De La Cruz", "Chau 13", "2017-09-06T00:11:22"));
-
+        messages.add(this.incomingMessage("Fabi De La Cruz", "Hola soy Fabi", "2017-09-05T00:11:22"));
         messages.add(this.incomingMessage("Maximiliano Bolia Morales", "Hola soy Maxi", "2017-09-06T00:11:22"));
+        messages.add(this.incomingMessage("Marco Dardis", "Hola soy Marco", "2017-09-06T00:11:22"));
+        messages.add(this.incomingMessage("Fabián Cardaci", "Hola soy Fabi", "2017-09-05T00:11:22"));
 
         persistenceService.insert(messages);
     }
